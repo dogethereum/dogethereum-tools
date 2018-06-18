@@ -1,0 +1,25 @@
+{
+  "name": "dogethereum-tools",
+  "version": "1.0.0",
+  "description": "",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "truffle-contract": "^3.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dogethereum/dogethereum-tools.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dogethereum/dogethereum-tools/issues"
+  },
+  "homepage": "https://github.com/dogethereum/dogethereum-tools#readme"
+}
