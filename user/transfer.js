@@ -1,23 +1,14 @@
-var process = require('process');
-var Web3 = require('web3');
-var contract = require("truffle-contract");
-var path = require('path');
-const fs = require('fs');
 var utils = require('./utils');
 
-var provider = new Web3.providers.HttpProvider("http://localhost:8545");
-var web3 = new Web3(provider);
-const DogeTokenJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../dogerelay/build/contracts/DogeToken.json')));
-const DogeToken = contract(DogeTokenJson);
-DogeToken.setNetwork('32001'); // integrationDogeRegtest
-DogeToken.setProvider(provider);
-
-
 async function doIt() {
-  var argv = process.argv;
-  var sender = utils.getCliParam(argv, 0);
-  var receiver = utils.getCliParam(argv, 1);
-  var valueToTransfer = utils.getCliParam(argv, 2);
+  var initObjects = utils.init();
+  var argv = initObjects.argv;
+  var web3 = initObjects.web3;
+  var DogeToken = initObjects.DogeToken;
+
+  var sender = utils.getCliParam(argv, 1);
+  var receiver = utils.getCliParam(argv, 2);
+  var valueToTransfer = utils.getCliParam(argv, 3);
 
   console.log("Transfer " + utils.dogeToSatoshi(valueToTransfer) + " doge tokens from " + sender + " to " + receiver);
 

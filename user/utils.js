@@ -1,4 +1,32 @@
+var process = require('process');
+var Web3 = require('web3');
+var contract = require("truffle-contract");
+var path = require('path');
+const fs = require('fs');
+
 module.exports = {
+  init: function () {
+    var provider = new Web3.providers.HttpProvider("http://localhost:8545");
+    var web3 = new Web3(provider);
+
+    var argv = process.argv;
+    var network = module.exports.getCliParam(argv, 0);    
+    var dogeTokenJsonPath;
+    var networkId;
+    if (network == 'integrationDogeRegtest') {
+      dogeTokenJsonPath = '../../dogerelay/build/contracts/DogeToken.json';
+      networkId = '32000';
+    } else if (network == 'ropstem') {
+      dogeTokenJsonPath = '../json/DogeToken.json';
+      networkId = '3';
+    }
+    const DogeTokenJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, dogeTokenJsonPath)));
+    const DogeToken = contract(DogeTokenJson);
+    DogeToken.setNetwork(networkId);
+    DogeToken.setProvider(provider);  
+    return {web3: web3, argv : argv, DogeToken: DogeToken};
+  }
+  ,
   doSomeChecks: async function (web3, sender, valueToTransfer) {
     // Do some checks
     if(!(valueToTransfer > 0)) {
