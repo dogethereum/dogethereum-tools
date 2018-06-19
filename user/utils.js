@@ -4,6 +4,7 @@ var path = require('path');
 var fs = require('fs');
 var pkg = require("../package.json");
 
+
 module.exports = {
   completeYargs: function (yargs) {
     return yargs
@@ -64,10 +65,6 @@ module.exports = {
   ,
   doSomeChecks: async function (web3, sender, valueToTransfer) {
     // Do some checks
-    if(!(valueToTransfer > 0)) {
-      console.log("Value should be greater than 0");
-      return false;
-    }
     if(!web3.isConnected()) {
       console.log("Can't connect to ethereum node.");
       return false;
@@ -104,7 +101,7 @@ module.exports = {
   ,
   dogeToSatoshi: function (num) {
     return num / 100000000;
-  }  
+  }
 }  
 
 

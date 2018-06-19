@@ -38,9 +38,14 @@ async function doIt() {
   console.log("Unlock " + utils.dogeToSatoshi(valueToUnlock) + " doge tokens from " + sender + " to " + dogeDestinationAddress + ".");
 
   // Do some checks
-  if (!await utils.doSomeChecks(web3, sender, valueToUnlock)) {
+  if (!await utils.doSomeChecks(web3, sender)) {
     return;
   }
+  if(!(valueToUnlock > 0)) {
+    console.log("Value should be greater than 0");
+    return;
+  }
+
 
   var dt = await DogeToken.deployed();
   await utils.printDogeTokenBalances(dt, sender);

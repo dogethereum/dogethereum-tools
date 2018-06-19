@@ -37,7 +37,11 @@ async function doIt() {
   console.log("Transfer " + utils.dogeToSatoshi(value) + " doge tokens from " + sender + " to " + receiver);
 
   // Do some checks
-  if (!await utils.doSomeChecks(web3, sender, value)) {
+  if (!await utils.doSomeChecks(web3, sender)) {
+    return;
+  }
+  if(!(value > 0)) {
+    console.log("Value should be greater than 0");
     return;
   }
 
