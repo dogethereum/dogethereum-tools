@@ -6,7 +6,8 @@
     "test": "test"
   },
   "dependencies": {
-    "truffle-contract": "^3.0.5"
+    "truffle-contract": "^3.0.5",
+    "yargs": "^11.1.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,14 +1,39 @@
 var utils = require('./utils');
+var yargs = require('yargs');
 
 async function doIt() {
-  var initObjects = utils.init();
-  var argv = initObjects.argv;
+  var argv = utils.completeYargs(yargs
+      .option('s', {
+        group: 'Data:',
+        alias: 'sender',
+        describe: 'from eth account',
+        demandOption: true
+      })
+      .option('r', {
+        group: 'Data:',
+        alias: 'receiver',
+        describe: 'doge destination address',
+        demandOption: true
+      })
+      .option('v', {
+        group: 'Data:',
+        alias: 'value',
+        describe: 'number of tokens to transfer',
+        type: 'number',
+        demandOption: true
+      })
+      .usage('node user/unlock.js --network <eth network> --sender <from eth account> --receiver <to doge address> --value <number of tokens>')
+      .example('node user/unlock.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000')
+    ).argv;
+
+  var initObjects = utils.init(argv);
   var web3 = initObjects.web3;
   var DogeToken = initObjects.DogeToken;
 
-  var sender = utils.getCliParam(argv, 1);
-  var dogeDestinationAddress = utils.getCliParam(argv, 2); // Something like "ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P"
-  var valueToUnlock = utils.getCliParam(argv, 3);
+
+  var sender = argv.sender;
+  var dogeDestinationAddress = argv.receiver;
+  var valueToUnlock = argv.value;
 
   console.log("Unlock " + utils.dogeToSatoshi(valueToUnlock) + " doge tokens from " + sender + " to " + dogeDestinationAddress + ".");
 
@@ -40,7 +65,7 @@ async function doIt() {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE  
         var valueToUnlockWithThisOperator = Math.min(valueToUnlock - valueUnlocked, dogeAvailableBalance);
         console.log("Unlocking " + valueToUnlockWithThisOperator + " DogeTokens using operator " + operatorPublicKeyHash);     
-        await dt.doUnlock(dogeDestinationAddress, valueToUnlock, operatorPublicKeyHash, {from: sender, gas: 350000});
+        await dt.doUnlock(dogeDestinationAddress, valueToUnlock, operatorPublicKeyHash, {from: sender, gas: 350000, gasPrice: argv.gasPrice});
         valueUnlocked += valueToUnlockWithThisOperator;
       }
     }

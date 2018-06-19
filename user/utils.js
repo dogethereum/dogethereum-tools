@@ -1,16 +1,51 @@
-var process = require('process');
 var Web3 = require('web3');
 var contract = require("truffle-contract");
 var path = require('path');
-const fs = require('fs');
+var fs = require('fs');
+var pkg = require("../package.json");
 
 module.exports = {
-  init: function () {
-    var provider = new Web3.providers.HttpProvider("http://localhost:8545");
+  completeYargs: function (yargs) {
+    return yargs
+    .option('n', {
+      group: 'Optional:',
+      alias: 'network',
+      describe: "Network to be used",
+      defaultDescription: "ropsten",
+      defaultDescription: "Ropsten test network.",
+      demandOption: false
+    })
+    .option('t', {
+      group: 'Optional:',
+      alias: 'host',
+      default: '127.0.0.1',
+      describe: 'host of the ethereum node'
+    })
+    .option('p', {
+      group: 'Optional:',
+      alias: 'port',
+      default: 8545,
+      describe: 'port of the ethereum node',
+      check: val => val >= 1 && val <= 65535
+    })
+    .option('g', {
+      group: 'Optional:',
+      alias: 'gasPrice',
+      describe: 'The price of gas in wei',
+      type: 'number',
+      default: 20000000000
+    })
+    .showHelpOnFail(false, 'Specify -h, -? or --help for available options') 
+    .help('h')
+    .alias('h', ['?', 'help'])
+    .version(pkg.version);
+  }
+  ,
+  init: function (argv) {
+    var provider = new Web3.providers.HttpProvider("http://" + argv.host + ":" + argv.port);
     var web3 = new Web3(provider);
 
-    var argv = process.argv;
-    var network = module.exports.getCliParam(argv, 0);    
+    var network = argv.network;
     var dogeTokenJsonPath;
     var networkId;
     if (network == 'integrationDogeRegtest') {
@@ -65,10 +100,6 @@ module.exports = {
       var receiverDogeTokenBalance = await dt.balanceOf.call(receiver);     
       console.log("Receiver doge token balance : " + module.exports.dogeToSatoshi(receiverDogeTokenBalance.toNumber())  + " doge tokens.");               
     }
-  }
-  ,
-  getCliParam: function (argv, i) {
-    return argv[2+i];    
   }
   ,
   dogeToSatoshi: function (num) {

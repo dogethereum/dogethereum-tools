@@ -17,16 +17,16 @@ Set of tools to be used by end users to interact with https://github.com/dogethe
 
 ### Transfer
 
-`node user/transfer.js <eth network> <from eth account> <to eth account> <number of tokens>`
+`node user/transfer.js --network <eth network> --sender <from eth account> --receiver <to eth account> --value <number of tokens>`
 
 eg:
 
-`node user/transfer.js ropsten 0xd2394f3fad76167e7583a876c292c86ed10305da 0xd2394f3fad76167e7583a876c292c86ed1ffffff 1`
+`node user/transfer.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1`
 
 ### Unlock
 
-`node user/unlock.js <eth network> <from eth account> <to doge address> <number of tokens>`
+`node user/unlock.js --network <eth network> --sender <from eth account> --receiver <to doge address> --value <number of tokens>`
 
 eg:
 
-`node user/transfer.js ropsten 0xd2394f3fad76167e7583a876c292c86ed10305da ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P 300000000`
+`node user/unlock.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000`
