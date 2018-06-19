@@ -2,7 +2,7 @@ var Web3 = require('web3');
 var contract = require("truffle-contract");
 var path = require('path');
 var fs = require('fs');
-var pkg = require("../package.json");
+var pkg = require("./package.json");
 
 
 module.exports = {
@@ -50,10 +50,10 @@ module.exports = {
     var dogeTokenJsonPath;
     var networkId;
     if (network == 'integrationDogeRegtest') {
-      dogeTokenJsonPath = '../../dogerelay/build/contracts/DogeToken.json';
+      dogeTokenJsonPath = '../dogerelay/build/contracts/DogeToken.json';
       networkId = '32000';
     } else if (network == 'ropstem') {
-      dogeTokenJsonPath = '../json/DogeToken.json';
+      dogeTokenJsonPath = 'json/DogeToken.json';
       networkId = '3';
     }
     const DogeTokenJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, dogeTokenJsonPath)));
