@@ -53,11 +53,7 @@ async function doIt() {
   console.log("Withdrawing operator deposit... ");
   var dt = await DogeToken.deployed();
   const withdrawOperatorDepositTxReceipt = await dt.withdrawOperatorDeposit(operatorPublicKeyHash, value, {from : operatorEthAddress, gas: 500000, gasPrice: argv.gasPrice});
-  if (withdrawOperatorDepositTxReceipt.logs.length == 1 && withdrawOperatorDepositTxReceipt.logs[0].event == "ErrorDogeToken") {
-    console.log("Withdraw operator deposit failed!. Error : " + withdrawOperatorDepositTxReceipt.logs[0].args.err.toNumber());
-  } else {
-    console.log("Operator deposit withdrawed.");
-  }
+  utils.printTxResult(withdrawOperatorDepositTxReceipt, "Withdraw operator deposit");
 
   await printOperatorDeposit(web3, dt, operatorPublicKeyHash);
 }

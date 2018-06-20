@@ -53,11 +53,7 @@ async function doIt() {
   console.log("Adding operator deposit... ");
   var dt = await DogeToken.deployed();
   const addOperatorDepositTxReceipt = await dt.addOperatorDeposit(operatorPublicKeyHash, {value: value, from : operatorEthAddress, gas: 500000, gasPrice: argv.gasPrice});
-  if (addOperatorDepositTxReceipt.logs.length == 1 && addOperatorDepositTxReceipt.logs[0].event == "ErrorDogeToken") {
-    console.log("Add operator deposit failed!. Error : " + addOperatorDepositTxReceipt.logs[0].args.err.toNumber());
-  } else {
-    console.log("Operator deposit added.");
-  }
+  utils.printTxResult(addOperatorDepositTxReceipt, "Add operator deposit");
 
   await printOperatorDeposit(web3, dt, operatorPublicKeyHash);
 }

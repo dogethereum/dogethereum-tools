@@ -34,7 +34,7 @@ async function doIt() {
   var receiver = argv.receiver;
   var value = argv.value;
 
-  console.log("Transfer " + utils.dogeToSatoshi(value) + " doge tokens from " + sender + " to " + receiver);
+  console.log("Transfer " + utils.satoshiToDoge(value) + " doge tokens from " + sender + " to " + receiver);
 
   // Do some checks
   if (!await utils.doSomeChecks(web3, sender)) {
@@ -47,10 +47,16 @@ async function doIt() {
 
   var dt = await DogeToken.deployed();
   await utils.printDogeTokenBalances(dt, sender, receiver);
+  var senderDogeTokenBalance = await dt.balanceOf.call(sender);
+  if (value > senderDogeTokenBalance.toNumber()) {
+    console.log("Error: Sender doge token balance is not enough.");
+    return;
+  }     
+
   // Do transfer  
   console.log("Initiating transfer... ");
-  await dt.transfer(receiver, value, {from: sender, gas: 50000, gasPrice: argv.gasPrice});     
-  console.log("Transfer Done.");
+  const transferTxReceipt = await dt.transfer(receiver, value, {from: sender, gas: 60000, gasPrice: argv.gasPrice});
+  utils.printTxResult(transferTxReceipt, "Transfer");
   await utils.printDogeTokenBalances(dt, sender, receiver);
 }
 

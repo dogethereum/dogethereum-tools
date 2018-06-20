@@ -90,17 +90,25 @@ module.exports = {
   printDogeTokenBalances: async function (dt, sender, receiver) {
     // Print sender DogeToken balance
     var senderDogeTokenBalance = await dt.balanceOf.call(sender);     
-    console.log("Sender doge token balance : " + module.exports.dogeToSatoshi(senderDogeTokenBalance.toNumber())  + " doge tokens.");     
+    console.log("Sender doge token balance : " + module.exports.satoshiToDoge(senderDogeTokenBalance.toNumber())  + " doge tokens.");     
 
     if (receiver) {
       // Print receiver DogeToken balance
       var receiverDogeTokenBalance = await dt.balanceOf.call(receiver);     
-      console.log("Receiver doge token balance : " + module.exports.dogeToSatoshi(receiverDogeTokenBalance.toNumber())  + " doge tokens.");               
+      console.log("Receiver doge token balance : " + module.exports.satoshiToDoge(receiverDogeTokenBalance.toNumber())  + " doge tokens.");               
     }
   }
   ,
-  dogeToSatoshi: function (num) {
+  satoshiToDoge: function (num) {
     return num / 100000000;
+  }
+  ,
+  printTxResult: function (txReceipt, operation) {
+    if (txReceipt.logs.length == 1 && txReceipt.logs[0].event == "ErrorDogeToken") {
+      console.log(operation + " failed!. Error : " + txReceipt.logs[0].args.err.toNumber());
+    } else {
+      console.log(operation + " done.");
+    }
   }
 }  
 

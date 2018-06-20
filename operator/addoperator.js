@@ -51,11 +51,7 @@ async function doIt() {
   console.log("Adding operator... ");
   var dt = await DogeToken.deployed();
   const addOperatorTxReceipt = await dt.addOperator(operatorPublicKeyCompressedString, signature, {from: operatorEthAddress, gas: 150000, gasPrice: argv.gasPrice});
-  if (addOperatorTxReceipt.logs.length == 1 && addOperatorTxReceipt.logs[0].event == "ErrorDogeToken") {
-    console.log("Add operator failed!. Error : " + addOperatorTxReceipt.logs[0].args.err.toNumber());
-  } else {
-    console.log("Operator added.");
-  }
+  utils.printTxResult(addOperatorTxReceipt, "Add operator");
 }
 
   function operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress) {

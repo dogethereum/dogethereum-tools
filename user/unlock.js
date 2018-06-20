@@ -35,7 +35,7 @@ async function doIt() {
   var dogeDestinationAddress = argv.receiver;
   var valueToUnlock = argv.value;
 
-  console.log("Unlock " + utils.dogeToSatoshi(valueToUnlock) + " doge tokens from " + sender + " to " + dogeDestinationAddress + ".");
+  console.log("Unlock " + utils.satoshiToDoge(valueToUnlock) + " doge tokens from " + sender + " to " + dogeDestinationAddress + ".");
 
   // Do some checks
   if (!await utils.doSomeChecks(web3, sender)) {
@@ -49,6 +49,12 @@ async function doIt() {
 
   var dt = await DogeToken.deployed();
   await utils.printDogeTokenBalances(dt, sender);
+  var senderDogeTokenBalance = await dt.balanceOf.call(sender);
+  if (valueToUnlock > senderDogeTokenBalance.toNumber()) {
+    console.log("Error: Sender doge token balance is not enough.");
+    return;
+  }     
+  
   // Do unlock
   console.log("Initiating unlock... ");
   var minUnlockValue = await dt.MIN_UNLOCK_VALUE();
@@ -69,9 +75,13 @@ async function doIt() {
       if (dogeAvailableBalance >= minUnlockValue) {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE  
         var valueToUnlockWithThisOperator = Math.min(valueToUnlock - valueUnlocked, dogeAvailableBalance);
-        console.log("Unlocking " + valueToUnlockWithThisOperator + " DogeTokens using operator " + operatorPublicKeyHash);     
-        await dt.doUnlock(dogeDestinationAddress, valueToUnlock, operatorPublicKeyHash, {from: sender, gas: 350000, gasPrice: argv.gasPrice});
-        valueUnlocked += valueToUnlockWithThisOperator;
+        console.log("Unlocking " + valueToUnlockWithThisOperator + " DogeTokens using operator " + operatorPublicKeyHash);             
+        const unlockTxReceipt = await dt.doUnlock(dogeDestinationAddress, valueToUnlock, operatorPublicKeyHash, {from: sender, gas: 350000, gasPrice: argv.gasPrice});
+        utils.printTxResult(unlockTxReceipt, "Unlock");
+        if (!(unlockTxReceipt.logs.length == 1 && unlockTxReceipt.logs[0].event == "ErrorDogeToken")) {
+          // unlock succeded
+          valueUnlocked += valueToUnlockWithThisOperator;
+        }        
       }
     }
     if (valueUnlocked == valueToUnlock) {
