@@ -12,7 +12,7 @@ async function doIt() {
       .option('v', {
         group: 'Data:',
         alias: 'value',
-        describe: 'number of wei to deposit',
+        describe: 'number of weis to deposit',
         type: 'number',
         demandOption: true
       })
