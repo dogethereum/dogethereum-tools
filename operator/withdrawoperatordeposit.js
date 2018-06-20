@@ -52,7 +52,7 @@ async function doIt() {
   // Withdraw operator deposit
   console.log("Withdrawing operator deposit... ");
   var dt = await DogeToken.deployed();
-  const withdrawOperatorDepositTxReceipt = await dt.withdrawOperatorDeposit(operatorPublicKeyHash, value, {from : operatorEthAddress, gas: 500000, gasPrice: argv.gasPrice});
+  const withdrawOperatorDepositTxReceipt = await dt.withdrawOperatorDeposit(operatorPublicKeyHash, value, {from : operatorEthAddress, gas: 50000, gasPrice: argv.gasPrice});
   utils.printTxResult(withdrawOperatorDepositTxReceipt, "Withdraw operator deposit");
 
   await printOperatorDeposit(web3, dt, operatorPublicKeyHash);

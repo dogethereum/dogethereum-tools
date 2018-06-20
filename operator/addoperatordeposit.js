@@ -52,7 +52,7 @@ async function doIt() {
   // Add operator deposit
   console.log("Adding operator deposit... ");
   var dt = await DogeToken.deployed();
-  const addOperatorDepositTxReceipt = await dt.addOperatorDeposit(operatorPublicKeyHash, {value: value, from : operatorEthAddress, gas: 500000, gasPrice: argv.gasPrice});
+  const addOperatorDepositTxReceipt = await dt.addOperatorDeposit(operatorPublicKeyHash, {value: value, from : operatorEthAddress, gas: 50000, gasPrice: argv.gasPrice});
   utils.printTxResult(addOperatorDepositTxReceipt, "Add operator deposit");
 
   await printOperatorDeposit(web3, dt, operatorPublicKeyHash);
