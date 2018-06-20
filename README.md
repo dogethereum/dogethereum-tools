@@ -15,7 +15,9 @@ Set of tools to be used by end users to interact with https://github.com/dogethe
 
 ## Using the tools
 
-### Transfer
+### User tools
+
+#### Transfer
 
 Transfers doge tokens from one user to another.
 
@@ -25,7 +27,7 @@ eg:
 
 `node user/transfer.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1`
 
-### Unlock
+#### Unlock
 
 Converts doge tokens on the eth blockchain to doges on the dogecoin blockchain.
 
@@ -35,8 +37,9 @@ eg:
 
 `node user/unlock.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000`
 
+### Operator tools
 
-### Add operator
+#### Add operator
 
 Registers a new operator.
 
@@ -47,7 +50,7 @@ eg:
 `node operator/addoperator.js --network integrationDogeRegtest --privateKey 0x105bd30419904ef409e9583da955037097f22b6b23c57549fe38ab8ffa9deaa3 --ethAddress 0xedaf5d525674475a1b546945acfa3b0cbc41f1a7`
 
 
-### Add operator deposit
+#### Add operator deposit
 
 Transfers eth from the operator account to the DogeToken contract.
 
@@ -58,7 +61,7 @@ eg:
 `node operator/addoperatordeposit.js --network ropsten --operatorPublicKeyHash 0x03cd041b0139d3240607b9fd1b2d1b691e22b5d6 --value 1000000000000000000 --ethAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff`
 
 
-### Withdraw operator deposit
+#### Withdraw operator deposit
 
 Transfers eth from the DogeToken contract to the operator account.
 
