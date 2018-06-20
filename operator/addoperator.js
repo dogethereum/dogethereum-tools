@@ -40,7 +40,6 @@ async function doIt() {
   }
 
   var dt = await DogeToken.deployed();
-  await utils.printDogeTokenBalances(dt, operatorEthAddress);
 
   // Add operator  
   var operatorSignItsEthAddressResult = operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress)
