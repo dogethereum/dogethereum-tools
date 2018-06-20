@@ -1,5 +1,5 @@
 # Dogethereum tools
-Set of tools to be used by end users to interact with https://github.com/dogethereum/dogethereum-contracts
+Set of tools to be used by end users and operators to interact with https://github.com/dogethereum/dogethereum-contracts
 
 ## Before using the tools, make sure 
 - Ethereum node is up and running, rpc is enabled without password on port 8545.
