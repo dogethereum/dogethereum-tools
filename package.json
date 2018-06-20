@@ -6,8 +6,9 @@
     "test": "test"
   },
   "dependencies": {
+    "yargs": "^11.1.0",
     "truffle-contract": "^3.0.5",
-    "yargs": "^11.1.0"
+    "bitcore-message": "^1.0.4"
   },
   "devDependencies": {},
   "scripts": {

@@ -30,3 +30,12 @@ eg:
 eg:
 
 `node user/unlock.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000`
+
+
+### Add operator
+
+`node operator/addoperator.js --network <eth network> --privateKey <operator private key in eth format> --ethAddress <operator eth address>`
+
+eg:
+
+`node operator/addoperator.js --network integrationDogeRegtest --privateKey 0x105bd30419904ef409e9583da955037097f22b6b23c57549fe38ab8ffa9deaa3 --ethAddress 0xedaf5d525674475a1b546945acfa3b0cbc41f1a7`
