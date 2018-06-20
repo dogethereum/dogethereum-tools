@@ -48,3 +48,13 @@ eg:
 eg:
 
 `node operator/addoperatordeposit.js --network ropsten --operatorPublicKeyHash 0x03cd041b0139d3240607b9fd1b2d1b691e22b5d6 --value 1000000000000000000 --ethAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff`
+
+
+### Withdraw operator deposit
+
+`node operator/withdrawoperatordeposit.js --network <eth network> --operatorPublicKeyHash <operator public key hash> --value <number of weis to withdraw> --ethAddress <operator eth address>`
+
+eg:
+
+`node operator/withdrawoperatordeposit.js --network ropsten --operatorPublicKeyHash 0x03cd041b0139d3240607b9fd1b2d1b691e22b5d6 --value 1000000000000000000 --ethAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff`
+
