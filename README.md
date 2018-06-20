@@ -17,6 +17,8 @@ Set of tools to be used by end users to interact with https://github.com/dogethe
 
 ### Transfer
 
+Transfers doge tokens from one user to another.
+
 `node user/transfer.js --network <eth network> --sender <from eth account> --receiver <to eth account> --value <number of tokens>`
 
 eg:
@@ -24,6 +26,8 @@ eg:
 `node user/transfer.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1`
 
 ### Unlock
+
+Converts doge tokens on the eth blockchain to doges on the dogecoin blockchain.
 
 `node user/unlock.js --network <eth network> --sender <from eth account> --receiver <to doge address> --value <number of tokens>`
 
@@ -34,6 +38,8 @@ eg:
 
 ### Add operator
 
+Registers a new operator.
+
 `node operator/addoperator.js --network <eth network> --privateKey <operator private key in eth format> --ethAddress <operator eth address>`
 
 eg:
@@ -43,6 +49,8 @@ eg:
 
 ### Add operator deposit
 
+Transfers eth from the operator account to the DogeToken contract.
+
 `node operator/addoperatordeposit.js --network <eth network> --operatorPublicKeyHash <operator public key hash> --value <number of weis to deposit> --ethAddress <operator eth address>`
 
 eg:
@@ -51,6 +59,8 @@ eg:
 
 
 ### Withdraw operator deposit
+
+Transfers eth from the DogeToken contract to the operator account.
 
 `node operator/withdrawoperatordeposit.js --network <eth network> --operatorPublicKeyHash <operator public key hash> --value <number of weis to withdraw> --ethAddress <operator eth address>`
 
