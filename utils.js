@@ -51,7 +51,7 @@ module.exports = {
     var networkId;
     if (network == 'integrationDogeRegtest') {
       dogeTokenJsonPath = '../dogerelay/build/contracts/DogeToken.json';
-      networkId = '32000';
+      networkId = '32001';
     } else if (network == 'ropstem') {
       dogeTokenJsonPath = 'json/DogeToken.json';
       networkId = '3';
