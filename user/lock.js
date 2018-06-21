@@ -66,7 +66,8 @@ async function doIt() {
   };
 
   var dogecoinRpc = new BitcoindRpc(dogeRpcConfig);
-  var dogecoinRpcInfo = await invokeDogecoinRpc(dogecoinRpc);
+  var dogecoinRpcInfo = await invokeDogecoinRpc(dogecoinRpc.getInfo.bind(dogecoinRpc));
+  console.log("Connected to dogecoin node!");
   console.log("dogecoinRpcInfo " + JSON.stringify(dogecoinRpcInfo));
 
   return;
@@ -134,15 +135,14 @@ async function doIt() {
   console.log("Lock Done.");
 }
 
-function invokeDogecoinRpc(dogecoinRpc) {
+function invokeDogecoinRpc(dogecoinRpcFunction) {
   return new Promise(function(resolve, reject) {
-    dogecoinRpc.getInfo(function (err, ret) {
+    dogecoinRpcFunction(function (err, ret) {
       if (err) {
         console.error("Can't connect to dogecoin node : " + err);
         reject(err);
         return;
       }  
-      console.error("Connected to dogecoin node!");
       resolve(ret);
     });
   });
