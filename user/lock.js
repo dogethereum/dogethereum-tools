@@ -1,5 +1,6 @@
 var utils = require('../utils');
 var yargs = require('yargs');
+var BitcoindRpc = require('bitcoind-rpc');
 
 async function doIt() {
   var argv = utils.completeYargs(yargs
@@ -7,7 +8,7 @@ async function doIt() {
         group: 'Optional:',
         alias: 'dogehost',
         default: '127.0.0.1',
-        describe: 'host of the dogecoin node'
+        describe: 'host of the dogecoin node',
         demandOption: false
       })
       .option('dp', {
@@ -15,21 +16,22 @@ async function doIt() {
         alias: 'dogeport',
         default: 44555, //mainnet: 22555 or testnet: 44555
         describe: 'port of the dogecoin node',
-        check: val => val >= 1 && val <= 65535
+        type: 'number',
+        check: val => val >= 1 && val <= 65535,
         demandOption: false
       })
       .option('du', {
         group: 'Optional:',
         alias: 'dogeuser',
         default: '',
-        describe: 'user of the dogecoin noderpc '
+        describe: 'user of the dogecoin noderpc',
         demandOption: false
       })
       .option('dd', {
         group: 'Optional:',
-        alias: 'dogepasword',
+        alias: 'dogepassword',
         default: '',
-        describe: 'password of the dogecoin noderpc '
+        describe: 'password of the dogecoin noderpc',
         demandOption: false
       })
       .option('v', {
@@ -50,13 +52,29 @@ async function doIt() {
   var dogehost = argv.dogehost
   var dogeport = argv.dogeport;
   var dogeuser = argv.dogeuser;
-  var dogepasword = argv.dogepasword;
+  var dogepassword = argv.dogepassword;
   var valueToLock = argv.value;
 
   console.log("Lock " + utils.satoshiToDoge(valueToLock) + " doges.");
 
+  var dogeRpcConfig = {
+    protocol: 'http',
+    user: argv.dogeuser,
+    pass: argv.dogepassword,
+    host: argv.dogehost,
+    port: argv.dogeport,
+  };
+
+  var dogecoinRpc = new BitcoindRpc(dogeRpcConfig);
+  var dogecoinRpcInfo = await invokeDogecoinRpc(dogecoinRpc);
+  console.log("dogecoinRpcInfo " + JSON.stringify(dogecoinRpcInfo));
+
+  return;
+
+ 
+
   // Do some checks
-  if (!await utils.doSomeChecks(web3, sender)) {
+  if (!await utils.doSomeChecks(web3)) {
     return;
   }
   if(!(valueToLock > 0)) {
@@ -114,6 +132,20 @@ async function doIt() {
   console.log("Total locked " + valueLocked + " satoshi doges");    
 
   console.log("Lock Done.");
+}
+
+function invokeDogecoinRpc(dogecoinRpc) {
+  return new Promise(function(resolve, reject) {
+    dogecoinRpc.getInfo(function (err, ret) {
+      if (err) {
+        console.error("Can't connect to dogecoin node : " + err);
+        reject(err);
+        return;
+      }  
+      console.error("Connected to dogecoin node!");
+      resolve(ret);
+    });
+  });
 }
 
 doIt();
