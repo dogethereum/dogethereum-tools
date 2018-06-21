@@ -63,26 +63,28 @@ module.exports = {
     return {web3: web3, argv : argv, DogeToken: DogeToken};
   }
   ,
-  doSomeChecks: async function (web3, sender, valueToTransfer) {
+  doSomeChecks: async function (web3, sender) {
     // Do some checks
     if(!web3.isConnected()) {
       console.log("Can't connect to ethereum node.");
       return false;
     }
-    try {
-      web3.eth.sign(sender, "sample message");
-    } catch(err) {
-      console.log("Can't use sender private key. Please, make sure the connected ethereum node has sender private key and that account is unlocked.");
-      console.log(err);
-      return false;
-    }
-    // Make sure sender has some eth to pay for txs
-    var senderEthBalance = await web3.eth.getBalance(sender);     
-    if (senderEthBalance.toNumber() == 0) {
-      console.log("Sender address has no eth balance, aborting.");
-      return false;
-    } else {
-      console.log("Sender eth balance : " + web3.fromWei(senderEthBalance.toNumber()) + " ETH. Please, make sure that is enough to pay for the tx.");
+    if (sender) {
+      try {
+        web3.eth.sign(sender, "sample message");
+      } catch(err) {
+        console.log("Can't use sender private key. Please, make sure the connected ethereum node has sender private key and that account is unlocked.");
+        console.log(err);
+        return false;
+      }
+      // Make sure sender has some eth to pay for txs
+      var senderEthBalance = await web3.eth.getBalance(sender);     
+      if (senderEthBalance.toNumber() == 0) {
+        console.log("Sender address has no eth balance, aborting.");
+        return false;
+      } else {
+        console.log("Sender eth balance : " + web3.fromWei(senderEthBalance.toNumber()) + " ETH. Please, make sure that is enough to pay for the tx.");
+      }      
     }
     return true;
   }
