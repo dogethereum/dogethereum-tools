@@ -24,14 +24,14 @@ async function doIt() {
         group: 'Optional:',
         alias: 'dogeuser',
         default: '',
-        describe: 'user of the dogecoin noderpc',
+        describe: 'user of the dogecoin node rpc',
         demandOption: false
       })
       .option('dd', {
         group: 'Optional:',
         alias: 'dogepassword',
         default: '',
-        describe: 'password of the dogecoin noderpc',
+        describe: 'password of the dogecoin node rpc',
         demandOption: false
       })
       .option('v', {
