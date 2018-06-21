@@ -1,6 +1,7 @@
 var utils = require('../utils');
 var yargs = require('yargs');
 var BitcoindRpc = require('bitcoind-rpc');
+var bitcoreLib = require('bitcore-lib');
 
 async function doIt() {
   var argv = utils.completeYargs(yargs
@@ -110,13 +111,16 @@ async function doIt() {
 
       if (operatorReceivableDoges >= minLockValue) {
         var valueToLockWithThisOperator = Math.min(valueToLock - valueLocked, operatorReceivableDoges);
-        console.log("Locking " + valueToLockWithThisOperator + " satoshi doges using operator " + operatorPublicKeyHash);             
-
-        // TODO var operatorDogeAddress = get it from operatorPublicKeyHash
-        var operatorDogeAddress = "nbGHE7gTixD86ttUyTZ4QAjZN8pBh7kYUR";
+        var Base58Check = bitcoreLib.encoding.Base58Check;
+        var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([113]), fromHex(operatorPublicKeyHash)]));
+        //var operatorDogeAddress = "nUYFtcNYdApGrRVHhskutu88fUjhcntdbf";
+        console.log("Locking " + valueToLockWithThisOperator + " satoshi doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
         var sendtoaddressResult = await invokeDogecoinRpcSendtoaddress(dogecoinRpc, operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
-        console.log("Sent doge tx " + JSON.stringify(sendtoaddressResult));        
+        console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
         valueLocked += valueToLockWithThisOperator;
+        var getrawtransactionResult = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", sendtoaddressResult.result);
+        console.log("getrawtransactionResult " + JSON.stringify(getrawtransactionResult));        
+
 
 
         //const unlockTxReceipt = await dt.doUnlock(dogeDestinationAddress, valueToUnlock, , {from: sender, gas: 350000, gasPrice: argv.gasPrice});
@@ -134,21 +138,6 @@ async function doIt() {
   console.log("Total locked " + valueLocked + " satoshi doges");    
 
   console.log("Lock Done.");
-}
-
-
-function invokeDogecoinRpcOld(dogecoinRpc, dogecoinRpcFunctionName) {
-  var dogecoinRpcFunction = eval("dogecoinRpc." + dogecoinRpcFunctionName + ".bind(dogecoinRpc)");
-  return new Promise(function(resolve, reject) {
-    dogecoinRpcFunction(function (err, ret) {
-      if (err) {
-        console.error("Can't connect to dogecoin node : " + JSON.stringify(err));
-        reject(err);
-        return;
-      }  
-      resolve(ret);
-    });
-  });
 }
 
 
@@ -178,26 +167,49 @@ function invokeDogecoinRpcSendtoaddress(dogecoinRpc, address, value) {
   });
 }
 
-// function invokeDogecoinRpc(dogecoinRpc, dogecoinRpcFunctionName) {
-//   var dogecoinRpcFunction = eval("dogecoinRpc." + dogecoinRpcFunctionName);
-//   var rpcParams = new Array();
-//   for (var i = 2; i < arguments.length; i++) {
-//     rpcParams.push (arguments[i]);
-//   }
-//   rpcParams.push (
-//     function (err, ret) {
-//       if (err) {
-//         console.error("Dogecoin RPC error : " + JSON.stringify(err));
-//         reject(err);
-//         return;
-//       }  
-//       resolve(ret);
-//     }
-//   );  
-//   return new Promise(function(resolve, reject) {
-//     dogecoinRpcFunction.apply(dogecoinRpc, rpcParams);
-//   });
-// }
+
+function invokeDogecoinRpcGettransaction(dogecoinRpc, txid) {
+  return new Promise(function(resolve, reject) {
+    dogecoinRpc.gettransaction(txid, function (err, ret) {
+      if (err) {
+        console.error("Can't invoke dogecoin gettransaction : " + JSON.stringify(err));
+        reject(err);
+        return;
+      }  
+      resolve(ret);
+    });
+  });
+}
+
+function fromHex (data) {
+  return Buffer.from(remove0x(data), 'hex');
+}
+
+function remove0x(str) {
+  return (str.indexOf("0x")==0) ? str.substring(2) : str;
+}
+
+
+function invokeDogecoinRpc(dogecoinRpc, dogecoinRpcFunctionName) {
+  var dogecoinRpcFunction = eval("dogecoinRpc." + dogecoinRpcFunctionName);
+  var rpcParams = new Array();
+  for (var i = 2; i < arguments.length; i++) {
+    rpcParams.push (arguments[i]);
+  }
+  return new Promise(function(resolve, reject) {
+    rpcParams.push (
+      function (err, ret) {
+        if (err) {
+          console.error("Dogecoin RPC error : " + JSON.stringify(err));
+          reject(err);
+          return;
+        }  
+        resolve(ret);
+      }
+    );    
+    dogecoinRpcFunction.apply(dogecoinRpc, rpcParams);
+  });
+}
 
 doIt();
 
