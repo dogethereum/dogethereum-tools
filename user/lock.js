@@ -85,7 +85,7 @@ async function doIt() {
   var minLockValue = await dt.MIN_LOCK_VALUE();
   minLockValue = minLockValue.toNumber();
   if(valueToLock < minLockValue) {
-    console.log("Value to lock " + valueToLock + " should be at least " + minLockValue);
+    console.log("Value to lock " + valueToLock + " doge satoshis is less than the minimum lock value " + minLockValue + " doge satoshis");
     return false;
   }  
   var dogeEthPrice = await dt.dogeEthPrice();
