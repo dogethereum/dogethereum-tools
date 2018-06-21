@@ -54,39 +54,39 @@ async function doIt() {
   utils.printTxResult(addOperatorTxReceipt, "Add operator");
 }
 
-  function operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress) {
-      // bitcoreLib.PrivateKey marks the private key as compressed if it receives a String as a parameter.
-      // bitcoreLib.PrivateKey marks the private key as uncompressed if it receives a Buffer as a parameter.
-      // In fact, private keys are not compressed/uncompressed. The compressed/uncompressed attribute
-      // is used when generating a compressed/uncompressed public key from the private key.
-      // Ethereum addresses are first 20 bytes of keccak256(uncompressed public key)
-      // Dogecoin public key hashes are calculated: ripemd160((sha256(compressed public key));
-      const operatorPrivateKeyCompressed = bitcoreLib.PrivateKey(remove0x(operatorPrivateKeyString));
-      const operatorPrivateKeyUncompressed = bitcoreLib.PrivateKey(fromHex(operatorPrivateKeyString))
-      const operatorPublicKeyCompressedString = "0x" + operatorPrivateKeyCompressed.toPublicKey().toString();
+function operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress) {
+    // bitcoreLib.PrivateKey marks the private key as compressed if it receives a String as a parameter.
+    // bitcoreLib.PrivateKey marks the private key as uncompressed if it receives a Buffer as a parameter.
+    // In fact, private keys are not compressed/uncompressed. The compressed/uncompressed attribute
+    // is used when generating a compressed/uncompressed public key from the private key.
+    // Ethereum addresses are first 20 bytes of keccak256(uncompressed public key)
+    // Dogecoin public key hashes are calculated: ripemd160((sha256(compressed public key));
+    const operatorPrivateKeyCompressed = bitcoreLib.PrivateKey(remove0x(operatorPrivateKeyString));
+    const operatorPrivateKeyUncompressed = bitcoreLib.PrivateKey(fromHex(operatorPrivateKeyString))
+    const operatorPublicKeyCompressedString = "0x" + operatorPrivateKeyCompressed.toPublicKey().toString();
 
-      // Generate the msg to be signed: double sha256 of operator eth address
-      const operatorEthAddressHash = bitcoreLib.crypto.Hash.sha256sha256(fromHex(operatorEthAddress));
+    // Generate the msg to be signed: double sha256 of operator eth address
+    const operatorEthAddressHash = bitcoreLib.crypto.Hash.sha256sha256(fromHex(operatorEthAddress));
 
-      // Operator private key uncompressed sign msg
-      var ecdsa = new ECDSA();
-      ecdsa.hashbuf = operatorEthAddressHash;
-      ecdsa.privkey = operatorPrivateKeyUncompressed;
-      ecdsa.pubkey = operatorPrivateKeyUncompressed.toPublicKey();
-      ecdsa.signRandomK();
-      ecdsa.calci();
-      var ecdsaSig = ecdsa.sig;
-      var signature = "0x" + ecdsaSig.toCompact().toString('hex');
-      return [operatorPublicKeyCompressedString, signature];
-  }    
+    // Operator private key uncompressed sign msg
+    var ecdsa = new ECDSA();
+    ecdsa.hashbuf = operatorEthAddressHash;
+    ecdsa.privkey = operatorPrivateKeyUncompressed;
+    ecdsa.pubkey = operatorPrivateKeyUncompressed.toPublicKey();
+    ecdsa.signRandomK();
+    ecdsa.calci();
+    var ecdsaSig = ecdsa.sig;
+    var signature = "0x" + ecdsaSig.toCompact().toString('hex');
+    return [operatorPublicKeyCompressedString, signature];
+}    
 
-  function fromHex (data) {
-    return Buffer.from(remove0x(data), 'hex');
-  }
+function fromHex (data) {
+  return Buffer.from(remove0x(data), 'hex');
+}
 
-  function remove0x(str) {
-    return (str.indexOf("0x")==0) ? str.substring(2) : str;
-  }
+function remove0x(str) {
+  return (str.indexOf("0x")==0) ? str.substring(2) : str;
+}
 
 
 doIt();
