@@ -11,7 +11,7 @@ module.exports = {
     .option('n', {
       group: 'Optional:',
       alias: 'network',
-      describe: "Network to be used",
+      describe: "Eth network to be used",
       defaultDescription: "ropsten",
       defaultDescription: "Ropsten test network.",
       demandOption: false
