@@ -114,43 +114,33 @@ async function doIt() {
         var valueToLockWithThisOperator = Math.min(valueToLock - valueLocked, operatorReceivableDoges);
         var Base58Check = bitcoreLib.encoding.Base58Check;
         var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([113]), utils.fromHex(operatorPublicKeyHash)]));
-        console.log("Locking " + valueToLockWithThisOperator + " satoshi doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
+        console.log("Locking " + utils.satoshiToDoge(valueToLockWithThisOperator) + " doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
         var sendtoaddressResult = await invokeDogecoinRpc(dogecoinRpc, "sendtoaddress", operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
         console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
         valueLocked += valueToLockWithThisOperator;
-        var getrawtransactionResult = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", sendtoaddressResult.result);        
-        var decoderawtransactionResult = await invokeDogecoinRpc(dogecoinRpc, "decoderawtransaction", getrawtransactionResult.result);
-        var firstInput = decoderawtransactionResult.result.vin[0];
 
-        var getrawtransactionResult2 = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", firstInput.txid);        
-        var decoderawtransactionResult2 = await invokeDogecoinRpc(dogecoinRpc, "decoderawtransaction", getrawtransactionResult2.result);
-        var userDogecoinAddress = decoderawtransactionResult2.result.vout[firstInput.vout].scriptPubKey.addresses[0];
-        
-        console.log("User Dogecoin Address : " + userDogecoinAddress);        
+        // Get the dogecoin address of the first input
+        var lockTxRawJson = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", sendtoaddressResult.result);        
+        var lockTxJson = await invokeDogecoinRpc(dogecoinRpc, "decoderawtransaction", lockTxRawJson.result);
+        var lockFirstInput = lockTxJson.result.vin[0];
+        var fundingTxRawJson = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", lockFirstInput.txid);        
+        var fundingTxJson = await invokeDogecoinRpc(dogecoinRpc, "decoderawtransaction", fundingTxRawJson.result);
+        var userDogecoinAddress = fundingTxJson.result.vout[lockFirstInput.vout].scriptPubKey.addresses[0];        
+
+        // Get the private key and eth address for the dogecoin address
         var dumpprivkeyResult = await invokeDogecoinRpc(dogecoinRpc, "dumpprivkey", userDogecoinAddress);
         var userPrivKeyInDogeFormat = dumpprivkeyResult.result;
-        console.log("User private key in dogecoin format : " + userPrivKeyInDogeFormat);
         var userPrivKeyInEthFormat = formatconverter.privKeyToEthFormat(userPrivKeyInDogeFormat)
         console.log("User private key in eth format : " + "0x" + userPrivKeyInEthFormat);
         var userEthAddress = formatconverter.getEthAddress(userPrivKeyInDogeFormat)
         console.log("User eth address : " + "0x" + userEthAddress);
-        
-
-
-
-        //const unlockTxReceipt = await dt.doUnlock(dogeDestinationAddress, valueToUnlock, , {from: sender, gas: 350000, gasPrice: argv.gasPrice});
-        //utils.printTxResult(unlockTxReceipt, "Unlock");
-        //if (!(unlockTxReceipt.logs.length == 1 && unlockTxReceipt.logs[0].event == "ErrorDogeToken")) {
-        //  // lock succeded
-        //  valueLocked += valueToLockWithThisOperator;
-        //}        
       }
     }
     if (valueLocked == valueToLock) {
       break;
     }
   }
-  console.log("Total locked " + valueLocked + " satoshi doges");    
+  console.log("Total locked " + utils.satoshiToDoge(valueLocked) + " doges");    
 
   console.log("Lock Done.");
 }
