@@ -37,7 +37,7 @@ async function doIt() {
         defaultDescription: "keep the eth address unlocked until the eth node exits."
       })
       .usage('Imports a dogecoin private key to ethereum node and unlocks it.\nUsage: node user/import-doge-key-to-eth.js --privateKey <private key in eth format>')
-      .example('import-doge-key-to-eth.js --privateKey  0x17ad918b6f62b449f3978eafd5bf237e2dec84f1e0366babf88ef3850691adbc')
+      .example('node user/import-doge-key-to-eth.js --privateKey  0x17ad918b6f62b449f3978eafd5bf237e2dec84f1e0366babf88ef3850691adbc')
     ).argv;
 
   var initObjects = utils.init(argv);
