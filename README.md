@@ -17,6 +17,52 @@ Set of tools to be used by end users and operators to interact with https://gith
 
 ### User tools
 
+#### Lock
+
+Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.
+
+`node user/lock.js --network <eth network> --value <number of doge satoshis>`
+
+eg:
+
+`node user/lock.js --network ropsten --value 200000000`
+
+
+#### Print balances
+
+Prints eth and doge token balances of an eth address.
+
+`node user/print-balances.js --network <eth network> --address <eth address>`
+
+eg:
+
+`node user/print-balances.js --network ropsten --address 0xd2394f3fad76167e7583a876c292c86ed1ffffff`
+
+#### Import doge key to eth
+
+Imports a dogecoin private key to ethereum node and unlocks it.
+After using the lock tool, the user will get doge tokens on the eth address controlled by the same private key that signed the dogecoin lock transaction.
+In order to use the tokens, the user should import the private key to the ethereum node.
+
+`node user/import-doge-key-to-eth.js --privateKey <private key in eth format>`
+
+eg:
+
+`node user/import-doge-key-to-eth.js --privateKey  0x17ad918b6f62b449f3978eafd5bf237e2dec84f1e0366babf88ef3850691adbc`
+
+
+#### Transfer Eth
+
+Transfers eth from one eth address to another.
+This is useful to fund the eth address that received doge tokens. In order to use the tokens, the address needs a small ammount of eth to pay eth tx fees.
+
+`node user/transfer-eth.js --network <eth network> --sender <from eth address> --receiver <to eth address> --value <number of weis>`
+
+eg:
+
+`node user/transfer-eth.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 10000000000000000`
+
+
 #### Transfer Tokens
 
 Transfers doge tokens from one user to another.
@@ -26,6 +72,8 @@ Transfers doge tokens from one user to another.
 eg:
 
 `node user/transfer-tokens.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1`
+
+
 
 #### Unlock
 
