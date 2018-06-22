@@ -17,15 +17,15 @@ Set of tools to be used by end users and operators to interact with https://gith
 
 ### User tools
 
-#### Transfer
+#### Transfer Tokens
 
 Transfers doge tokens from one user to another.
 
-`node user/transfer.js --network <eth network> --sender <from eth account> --receiver <to eth account> --value <number of tokens>`
+`node user/transfer-tokens.js --network <eth network> --sender <from eth account> --receiver <to eth account> --value <number of tokens>`
 
 eg:
 
-`node user/transfer.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1`
+`node user/transfer-tokens.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1`
 
 #### Unlock
 
