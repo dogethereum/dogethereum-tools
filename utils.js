@@ -111,7 +111,14 @@ module.exports = {
     } else {
       console.log(operation + " done.");
     }
+  },
+  fromHex: function (data) {
+    return Buffer.from(module.exports.remove0x(data), 'hex');
   }
+  ,
+  remove0x: function (str) {
+    return (str.indexOf("0x")==0) ? str.substring(2) : str;
+  }  
 }  
 
 

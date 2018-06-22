@@ -113,8 +113,7 @@ async function doIt() {
       if (operatorReceivableDoges >= minLockValue) {
         var valueToLockWithThisOperator = Math.min(valueToLock - valueLocked, operatorReceivableDoges);
         var Base58Check = bitcoreLib.encoding.Base58Check;
-        var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([113]), fromHex(operatorPublicKeyHash)]));
-        //var operatorDogeAddress = "nUYFtcNYdApGrRVHhskutu88fUjhcntdbf";
+        var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([113]), utils.fromHex(operatorPublicKeyHash)]));
         console.log("Locking " + valueToLockWithThisOperator + " satoshi doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
         var sendtoaddressResult = await invokeDogecoinRpc(dogecoinRpc, "sendtoaddress", operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
         console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
@@ -154,16 +153,6 @@ async function doIt() {
   console.log("Total locked " + valueLocked + " satoshi doges");    
 
   console.log("Lock Done.");
-}
-
-
-
-function fromHex (data) {
-  return Buffer.from(remove0x(data), 'hex');
-}
-
-function remove0x(str) {
-  return (str.indexOf("0x")==0) ? str.substring(2) : str;
 }
 
 

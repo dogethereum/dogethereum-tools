@@ -44,7 +44,7 @@ async function doIt() {
   var operatorSignItsEthAddressResult = operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress)
   var operatorPublicKeyCompressedString = operatorSignItsEthAddressResult[0];
   var signature = operatorSignItsEthAddressResult[1];
-  var operatorPublicKeyHash = bitcoreLib.crypto.Hash.ripemd160(bitcoreLib.crypto.Hash.sha256(fromHex(operatorPublicKeyCompressedString)));
+  var operatorPublicKeyHash = bitcoreLib.crypto.Hash.ripemd160(bitcoreLib.crypto.Hash.sha256(utils.fromHex(operatorPublicKeyCompressedString)));
   console.log("Operator public key hash:  " + "0x" + operatorPublicKeyHash.toString('hex'));
 
   console.log("Adding operator... ");
@@ -60,12 +60,12 @@ function operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress)
     // is used when generating a compressed/uncompressed public key from the private key.
     // Ethereum addresses are first 20 bytes of keccak256(uncompressed public key)
     // Dogecoin public key hashes are calculated: ripemd160((sha256(compressed public key));
-    const operatorPrivateKeyCompressed = bitcoreLib.PrivateKey(remove0x(operatorPrivateKeyString));
-    const operatorPrivateKeyUncompressed = bitcoreLib.PrivateKey(fromHex(operatorPrivateKeyString))
+    const operatorPrivateKeyCompressed = bitcoreLib.PrivateKey(utils.remove0x(operatorPrivateKeyString));
+    const operatorPrivateKeyUncompressed = bitcoreLib.PrivateKey(utils.fromHex(operatorPrivateKeyString))
     const operatorPublicKeyCompressedString = "0x" + operatorPrivateKeyCompressed.toPublicKey().toString();
 
     // Generate the msg to be signed: double sha256 of operator eth address
-    const operatorEthAddressHash = bitcoreLib.crypto.Hash.sha256sha256(fromHex(operatorEthAddress));
+    const operatorEthAddressHash = bitcoreLib.crypto.Hash.sha256sha256(utils.fromHex(operatorEthAddress));
 
     // Operator private key uncompressed sign msg
     var ecdsa = new ECDSA();
@@ -77,15 +77,6 @@ function operatorSignItsEthAddress(operatorPrivateKeyString, operatorEthAddress)
     var ecdsaSig = ecdsa.sig;
     var signature = "0x" + ecdsaSig.toCompact().toString('hex');
     return [operatorPublicKeyCompressedString, signature];
-}    
-
-function fromHex (data) {
-  return Buffer.from(remove0x(data), 'hex');
 }
-
-function remove0x(str) {
-  return (str.indexOf("0x")==0) ? str.substring(2) : str;
-}
-
 
 doIt();
