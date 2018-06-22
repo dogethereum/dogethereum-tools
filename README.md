@@ -40,8 +40,8 @@ eg:
 
 #### Import doge key to eth
 
-Imports a dogecoin private key to ethereum node and unlocks it.
-After using the lock tool, the user will get doge tokens on the eth address controlled by the same private key that signed the dogecoin lock transaction.
+Imports a dogecoin private key to ethereum node and unlocks it.<br/>
+After using the lock tool, the user will get doge tokens on the eth address controlled by the same private key that signed the dogecoin lock transaction.<br/>
 In order to use the tokens, the user should import the private key to the ethereum node.
 
 `node user/import-doge-key-to-eth.js --privateKey <private key in eth format>`
@@ -53,8 +53,8 @@ eg:
 
 #### Transfer Eth
 
-Transfers eth from one eth address to another.
-This is useful to fund the eth address that received doge tokens. In order to use the tokens, the address needs a small ammount of eth to pay eth tx fees.
+Transfers eth from one eth address to another.<br/>
+This is useful to fund the eth address that received doge tokens. In order to use the tokens, the address needs a small amount of eth to pay eth tx fees.
 
 `node user/transfer-eth.js --network <eth network> --sender <from eth address> --receiver <to eth address> --value <number of weis>`
 
