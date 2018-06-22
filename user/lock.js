@@ -109,11 +109,11 @@ async function doIt() {
 
       var operatorReceivableDoges = (operatorEthBalance / dogeEthPrice / collateralRatio) - (operatorDogeAvailableBalance + operatorDogePendingBalance);
 
-
       if (operatorReceivableDoges >= minLockValue) {
         var valueToLockWithThisOperator = Math.min(valueToLock - valueLocked, operatorReceivableDoges);
         var Base58Check = bitcoreLib.encoding.Base58Check;
-        var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([113]), utils.fromHex(operatorPublicKeyHash)]));
+        var dogeAddressPrefix = argv.network == 'main' ? 30 : 113;
+        var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([dogeAddressPrefix]), utils.fromHex(operatorPublicKeyHash)]));
         console.log("Locking " + utils.satoshiToDoge(valueToLockWithThisOperator) + " doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
         var sendtoaddressResult = await invokeDogecoinRpc(dogecoinRpc, "sendtoaddress", operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
         console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
