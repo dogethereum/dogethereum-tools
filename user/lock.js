@@ -1,4 +1,5 @@
 var utils = require('../utils');
+var formatconverter = require('./formatconverter');
 var yargs = require('yargs');
 var BitcoindRpc = require('bitcoind-rpc');
 var bitcoreLib = require('bitcore-lib');
@@ -67,7 +68,7 @@ async function doIt() {
   };
 
   var dogecoinRpc = new BitcoindRpc(dogeRpcConfig);
-  await invokeDogecoinRpcGetinfo(dogecoinRpc);
+  await invokeDogecoinRpc(dogecoinRpc, "getinfo");
   console.log("Connected to dogecoin node!");
 
   // Do some checks
@@ -115,11 +116,26 @@ async function doIt() {
         var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([113]), fromHex(operatorPublicKeyHash)]));
         //var operatorDogeAddress = "nUYFtcNYdApGrRVHhskutu88fUjhcntdbf";
         console.log("Locking " + valueToLockWithThisOperator + " satoshi doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
-        var sendtoaddressResult = await invokeDogecoinRpcSendtoaddress(dogecoinRpc, operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
+        var sendtoaddressResult = await invokeDogecoinRpc(dogecoinRpc, "sendtoaddress", operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
         console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
         valueLocked += valueToLockWithThisOperator;
-        var getrawtransactionResult = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", sendtoaddressResult.result);
-        console.log("getrawtransactionResult " + JSON.stringify(getrawtransactionResult));        
+        var getrawtransactionResult = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", sendtoaddressResult.result);        
+        var decoderawtransactionResult = await invokeDogecoinRpc(dogecoinRpc, "decoderawtransaction", getrawtransactionResult.result);
+        var firstInput = decoderawtransactionResult.result.vin[0];
+
+        var getrawtransactionResult2 = await invokeDogecoinRpc(dogecoinRpc, "getrawtransaction", firstInput.txid);        
+        var decoderawtransactionResult2 = await invokeDogecoinRpc(dogecoinRpc, "decoderawtransaction", getrawtransactionResult2.result);
+        var userDogecoinAddress = decoderawtransactionResult2.result.vout[firstInput.vout].scriptPubKey.addresses[0];
+        
+        console.log("User Dogecoin Address : " + userDogecoinAddress);        
+        var dumpprivkeyResult = await invokeDogecoinRpc(dogecoinRpc, "dumpprivkey", userDogecoinAddress);
+        var userPrivKeyInDogeFormat = dumpprivkeyResult.result;
+        console.log("User private key in dogecoin format : " + userPrivKeyInDogeFormat);
+        var userPrivKeyInEthFormat = formatconverter.privKeyToEthFormat(userPrivKeyInDogeFormat)
+        console.log("User private key in dogecoin eth format : " + "0x" + userPrivKeyInEthFormat);
+        var userEthAddress = formatconverter.getEthAddress(userPrivKeyInDogeFormat)
+        console.log("User eth address : " + "0x" + userEthAddress);
+        
 
 
 
@@ -141,45 +157,6 @@ async function doIt() {
 }
 
 
-function invokeDogecoinRpcGetinfo(dogecoinRpc) {
-  return new Promise(function(resolve, reject) {
-    dogecoinRpc.getinfo(function (err, ret) {
-      if (err) {
-        console.error("Can't connect to dogecoin node : " + JSON.stringify(err));
-        reject(err);
-        return;
-      }  
-      resolve(ret);
-    });
-  });
-}
-
-function invokeDogecoinRpcSendtoaddress(dogecoinRpc, address, value) {
-  return new Promise(function(resolve, reject) {
-    dogecoinRpc.sendtoaddress(address, value, function (err, ret) {
-      if (err) {
-        console.error("Can't invoke dogecoin sendtoaddress : " + JSON.stringify(err));
-        reject(err);
-        return;
-      }  
-      resolve(ret);
-    });
-  });
-}
-
-
-function invokeDogecoinRpcGettransaction(dogecoinRpc, txid) {
-  return new Promise(function(resolve, reject) {
-    dogecoinRpc.gettransaction(txid, function (err, ret) {
-      if (err) {
-        console.error("Can't invoke dogecoin gettransaction : " + JSON.stringify(err));
-        reject(err);
-        return;
-      }  
-      resolve(ret);
-    });
-  });
-}
 
 function fromHex (data) {
   return Buffer.from(remove0x(data), 'hex');

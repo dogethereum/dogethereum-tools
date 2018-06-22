@@ -9,7 +9,8 @@
     "yargs": "^11.1.0",
     "truffle-contract": "^3.0.5",
     "bitcore-message": "^1.0.4",
-    "bitcoind-rpc": "^0.7.1"
+    "bitcoind-rpc": "^0.7.1",
+    "ethereumjs-wallet": "^0.6.0"
   },
   "devDependencies": {},
   "scripts": {
