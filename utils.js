@@ -37,6 +37,12 @@ module.exports = {
       type: 'number',
       default: 20000000000
     })
+    .option('j', {
+      group: 'Connection:',
+      alias: 'json',
+      describe: "Location of the truffle DogeToken json. Just to be using during development on 'integrationDogeRegtest' network.",
+      demandOption: false
+    })
     .showHelpOnFail(false, 'Specify -h, -? or --help for available options') 
     .help('h')
     .alias('h', ['?', 'help'])
@@ -51,13 +57,14 @@ module.exports = {
     var dogeTokenJsonPath;
     var networkId;
     if (network == 'integrationDogeRegtest') {
-      dogeTokenJsonPath = '../dogerelay/build/contracts/DogeToken.json';
+      //dogeTokenJsonPath = '../dogerelay/build/contracts/DogeToken.json';
+      dogeTokenJsonPath = argv.json;
       networkId = '32001';
     } else if (network == 'ropsten') {
-      dogeTokenJsonPath = 'json/DogeToken.json';
+      dogeTokenJsonPath = path.resolve(__dirname, 'json/DogeToken.json');
       networkId = '3';
     }
-    const DogeTokenJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, dogeTokenJsonPath)));
+    const DogeTokenJson = JSON.parse(fs.readFileSync(dogeTokenJsonPath));
     const DogeToken = contract(DogeTokenJson);
     DogeToken.setNetwork(networkId);
     DogeToken.setProvider(provider);  
