@@ -131,7 +131,7 @@ async function doIt() {
         var userPrivKeyInDogeFormat = dumpprivkeyResult.result;
         console.log("User private key in dogecoin format : " + userPrivKeyInDogeFormat);
         var userPrivKeyInEthFormat = formatconverter.privKeyToEthFormat(userPrivKeyInDogeFormat)
-        console.log("User private key in dogecoin eth format : " + "0x" + userPrivKeyInEthFormat);
+        console.log("User private key in eth format : " + "0x" + userPrivKeyInEthFormat);
         var userEthAddress = formatconverter.getEthAddress(userPrivKeyInDogeFormat)
         console.log("User eth address : " + "0x" + userEthAddress);
         
