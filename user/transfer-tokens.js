@@ -6,13 +6,13 @@ async function doIt() {
       .option('s', {
         group: 'Data:',
         alias: 'sender',
-        describe: 'from eth account',
+        describe: 'from eth address',
         demandOption: true
       })
       .option('r', {
         group: 'Data:',
         alias: 'receiver',
-        describe: 'to eth account',
+        describe: 'to eth address',
         demandOption: true
       })
       .option('v', {
@@ -22,7 +22,7 @@ async function doIt() {
         type: 'number',
         demandOption: true
       })
-      .usage('Transfers doge tokens from one user to another.\nUsage: node user/transfer-tokens.js --network <eth network> --sender <from eth account> --receiver <to eth account> --value <number of tokens>')
+      .usage('Transfers doge tokens from one user to another.\nUsage: node user/transfer-tokens.js --network <eth network> --sender <from eth address> --receiver <to eth address> --value <number of tokens>')
       .example('node user/transfer-tokens.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1')      
     ).argv;
 
