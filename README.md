@@ -1,16 +1,11 @@
 # Dogethereum tools
 Set of tools to be used by end users and operators to interact with https://github.com/dogethereum/dogethereum-contracts
 
-## Before using the tools, make sure 
-- Ethereum node is up and running, rpc is enabled without password on port 8545.
-- Ethereum node has the private key for the sending account. 
-- The sending account has both eth (to pay tx fees) and doge tokens.
-
 ## Requirements
 - npm version 5.5.1 or later.
 - node version 9.2.0 or later.
-- dogecoin node running with RPC interface enabled
-- ethereum node running with RPC interface enabled
+- Dogecoin node running with RPC interface enabled.
+- Ethereum node running with RPC interface enabled without password on port 8545.
 
 ## Installation
 - `git clone https://github.com/dogethereum/dogethereum-tools`
