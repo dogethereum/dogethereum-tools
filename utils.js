@@ -9,28 +9,29 @@ module.exports = {
   completeYargs: function (yargs) {
     return yargs
     .option('n', {
-      group: 'Optional:',
+      group: 'Connection:',
       alias: 'network',
       describe: "Eth network to be used",
-      defaultDescription: "ropsten",
+      default: "ropsten",
       defaultDescription: "Ropsten test network.",
+      choices: ['integrationDogeRegtest', 'ropsten'],
       demandOption: false
     })
     .option('t', {
-      group: 'Optional:',
+      group: 'Connection:',
       alias: 'host',
       default: '127.0.0.1',
       describe: 'host of the ethereum node'
     })
     .option('p', {
-      group: 'Optional:',
+      group: 'Connection:',
       alias: 'port',
       default: 8545,
       describe: 'port of the ethereum node',
       check: val => val >= 1 && val <= 65535
     })
     .option('g', {
-      group: 'Optional:',
+      group: 'Connection:',
       alias: 'gasPrice',
       describe: 'The price of gas in wei',
       type: 'number',
@@ -52,7 +53,7 @@ module.exports = {
     if (network == 'integrationDogeRegtest') {
       dogeTokenJsonPath = '../dogerelay/build/contracts/DogeToken.json';
       networkId = '32001';
-    } else if (network == 'ropstem') {
+    } else if (network == 'ropsten') {
       dogeTokenJsonPath = 'json/DogeToken.json';
       networkId = '3';
     }
@@ -83,7 +84,7 @@ module.exports = {
         console.log("Sender address has no eth balance, aborting.");
         return false;
       } else {
-        console.log("Sender eth balance : " + web3.fromWei(senderEthBalance.toNumber()) + " ETH. Please, make sure that is enough to pay for the tx.");
+        console.log("Sender eth balance : " + web3.fromWei(senderEthBalance.toNumber()) + " eth. Please, make sure that is enough to pay for the tx fee.");
       }      
     }
     return true;
