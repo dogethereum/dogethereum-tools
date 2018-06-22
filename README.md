@@ -9,9 +9,13 @@ Set of tools to be used by end users and operators to interact with https://gith
 ## Requirements
 - npm version 5.5.1 or later.
 - node version 9.2.0 or later.
+- dogecoin node running with RPC interface enabled
+- ethereum node running with RPC interface enabled
 
 ## Installation
-- npm install
+- `git clone https://github.com/dogethereum/dogethereum-tools`
+- `cd dogethereum-tools`
+- `npm install`
 
 ## Using the tools
 
