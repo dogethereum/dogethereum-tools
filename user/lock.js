@@ -36,6 +36,22 @@ async function doIt() {
         describe: 'password of the dogecoin node rpc',
         demandOption: false
       })
+      .option('dn', {
+        group: 'Optional:',
+        alias: 'dogenetwork',
+        describe: "Doge network to be used",
+        default: "mainnet",
+        defaultDescription: "dogecoin mainnet network.",
+        choices: ['mainnet', 'testnet', 'regtest'],
+        demandOption: false
+      })
+      .option('ds', {
+        group: 'Optional:',
+        alias: 'dogewalletpassphrase',
+        default: '',
+        describe: 'passphrase of the dogecoin wallet',
+        demandOption: false
+      })
       .option('v', {
         group: 'Data:',
         alias: 'value',
@@ -112,9 +128,12 @@ async function doIt() {
       if (operatorReceivableDoges >= minLockValue) {
         var valueToLockWithThisOperator = Math.min(valueToLock - valueLocked, operatorReceivableDoges);
         var Base58Check = bitcoreLib.encoding.Base58Check;
-        var dogeAddressPrefix = argv.network == 'main' ? 30 : 113;
+        var dogeAddressPrefix = argv.dogenetwork == 'mainnet' ? 30 : 113;
         var operatorDogeAddress = Base58Check.encode(Buffer.concat([Buffer.from([dogeAddressPrefix]), utils.fromHex(operatorPublicKeyHash)]));
         console.log("Locking " + utils.satoshiToDoge(valueToLockWithThisOperator) + " doges to address " + operatorDogeAddress + " using operator " + operatorPublicKeyHash);
+        if (argv.dogewalletpassphrase) {
+          var walletpassphraseResult = await invokeDogecoinRpc(dogecoinRpc, "walletpassphrase", argv.dogewalletpassphrase, 30);
+        }
         var sendtoaddressResult = await invokeDogecoinRpc(dogecoinRpc, "sendtoaddress", operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
         console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
         valueLocked += valueToLockWithThisOperator;
