@@ -22,8 +22,8 @@ async function doIt() {
         type: 'number',
         demandOption: true
       })
-      .usage('Converts doge tokens on the eth blockchain to doges on the dogecoin blockchain.\nUsage: node user/unlock.js --network <eth network> --sender <from eth account> --receiver <to doge address> --value <number of tokens>')
-      .example('node user/unlock.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000')
+      .usage('Converts doge tokens on the eth blockchain to doges on the dogecoin blockchain.\nUsage: node user/unlock.js --ethnetwork <eth network> --sender <from eth account> --receiver <to doge address> --value <number of tokens>')
+      .example('node user/unlock.js --ethnetwork ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000')
     ).argv;
 
   var initObjects = utils.init(argv);

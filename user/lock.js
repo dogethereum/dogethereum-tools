@@ -43,8 +43,8 @@ async function doIt() {
         type: 'number',
         demandOption: true
       })
-      .usage('Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.\nUsage: node user/lock.js --network <eth network>  --value <number of doge satoshis>')
-      .example('node user/lock.js --network ropsten --value 200000000')
+      .usage('Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.\nUsage: node user/lock.js --ethnetwork <eth network>  --value <number of doge satoshis>')
+      .example('node user/lock.js --ethnetwork ropsten --value 200000000')
     ).argv;
 
   var initObjects = utils.init(argv);

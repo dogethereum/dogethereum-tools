@@ -20,8 +20,8 @@ async function doIt() {
         describe: 'operator eth address',
         demandOption: true
       })
-      .usage('Registers a new operator.\nUsage: node operator/addoperator.js --network <eth network> --privateKey <operator private key in eth format> --ethAddress <operator eth address>')
-      .example('node operator/addoperator.js --network ropsten --privateKey 0x105bd30419904ef409e9583da955037097f22b6b23c57549fe38ab8ffa9deaa3 --ethAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff')
+      .usage('Registers a new operator.\nUsage: node operator/addoperator.js --ethnetwork <eth network> --privateKey <operator private key in eth format> --ethAddress <operator eth address>')
+      .example('node operator/addoperator.js --ethnetwork ropsten --privateKey 0x105bd30419904ef409e9583da955037097f22b6b23c57549fe38ab8ffa9deaa3 --ethAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff')
     ).argv;
 
   var initObjects = utils.init(argv);

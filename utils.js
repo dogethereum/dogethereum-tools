@@ -10,11 +10,11 @@ module.exports = {
     return yargs
     .option('n', {
       group: 'Connection:',
-      alias: 'network',
+      alias: 'ethnetwork',
       describe: "Eth network to be used",
       default: "ropsten",
       defaultDescription: "Ropsten test network.",
-      choices: ['integrationDogeRegtest', 'ropsten'],
+      choices: ['ganacheDogeRegtest', 'ganacheDogeMainnet', 'ropsten'],
       demandOption: false
     })
     .option('t', {
@@ -40,7 +40,7 @@ module.exports = {
     .option('j', {
       group: 'Connection:',
       alias: 'json',
-      describe: "Location of the truffle DogeToken json. Just to be using during development on 'integrationDogeRegtest' network.",
+      describe: "Location of the truffle DogeToken json. Just to be using during development on 'ganacheDogeRegtest' or 'ganacheDogeMainnet' network.",
       demandOption: false
     })
     .showHelpOnFail(false, 'Specify -h, -? or --help for available options') 
@@ -53,20 +53,22 @@ module.exports = {
     var provider = new Web3.providers.HttpProvider("http://" + argv.host + ":" + argv.port);
     var web3 = new Web3(provider);
 
-    var network = argv.network;
+    var ethnetwork = argv.ethnetwork;
     var dogeTokenJsonPath;
-    var networkId;
-    if (network == 'integrationDogeRegtest') {
-      //dogeTokenJsonPath = '../dogerelay/build/contracts/DogeToken.json';
+    var ethNetworkId;
+    if (ethnetwork == 'ganacheDogeRegtest') {
       dogeTokenJsonPath = argv.json;
-      networkId = '32001';
-    } else if (network == 'ropsten') {
+      ethNetworkId = '32001';
+    } else if (ethnetwork == 'ganacheDogeMainnet') {
+      dogeTokenJsonPath = argv.json;
+      ethNetworkId = '32000';
+    } else if (ethnetwork == 'ropsten') {
       dogeTokenJsonPath = path.resolve(__dirname, 'json/DogeToken.json');
-      networkId = '3';
+      ethNetworkId = '3';
     }
     const DogeTokenJson = JSON.parse(fs.readFileSync(dogeTokenJsonPath));
     const DogeToken = contract(DogeTokenJson);
-    DogeToken.setNetwork(networkId);
+    DogeToken.setNetwork(ethNetworkId);
     DogeToken.setProvider(provider);  
     return {web3: web3, argv : argv, DogeToken: DogeToken};
   }

@@ -22,8 +22,8 @@ async function doIt() {
         type: 'number',
         demandOption: true
       })
-      .usage('Transfers eth from one eth address to another.\nUsage: node user/transfer-eth.js --network <eth network> --sender <from eth address> --receiver <to eth address> --value <number of weis>')
-      .example('node user/transfer-eth.js --network ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 10000000000000000')      
+      .usage('Transfers eth from one eth address to another.\nUsage: node user/transfer-eth.js --ethnetwork <eth network> --sender <from eth address> --receiver <to eth address> --value <number of weis>')
+      .example('node user/transfer-eth.js --ethnetwork ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 10000000000000000')      
     ).argv;
 
   var initObjects = utils.init(argv);
