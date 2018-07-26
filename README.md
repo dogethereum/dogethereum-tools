@@ -120,4 +120,6 @@ eg:
 
 ## License
 
-Copyright (c) 2018 Coinfabrik and Oscar Guindzberg. You will need to get a written authorization from them to use this code.
+MIT License<br/>
+Copyright (c) 2018 Coinfabrik & Oscar Guindzberg<br/>
+[License](LICENSE)
