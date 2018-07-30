@@ -1,5 +1,8 @@
 # Dogethereum tools
+
 Set of tools to be used by end users and operators to interact with https://github.com/dogethereum/dogethereum-contracts
+
+If you are new to the Dogecoin <-> Ethereum bridge, please check the [docs](https://github.com/dogethereum/docs) repository first.
 
 ## Requirements
 - npm version 5.5.1 or later.
