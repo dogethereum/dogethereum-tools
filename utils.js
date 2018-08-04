@@ -81,7 +81,7 @@ module.exports = {
     }
     if (sender) {
       try {
-        web3.eth.sign(sender, "sample message");
+        web3.eth.sign(sender, "0x123456");
       } catch(err) {
         console.log("Can't use sender private key. Please, make sure the connected ethereum node has sender private key and that account is unlocked.");
         console.log(err);
