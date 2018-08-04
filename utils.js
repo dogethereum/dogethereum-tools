@@ -12,9 +12,9 @@ module.exports = {
       group: 'Connection:',
       alias: 'ethnetwork',
       describe: "Eth network to be used",
-      default: "ropsten",
-      defaultDescription: "Ropsten test network.",
-      choices: ['ganacheDogeRegtest', 'ganacheDogeMainnet', 'ropsten'],
+      default: "rinkeby",
+      defaultDescription: "Rinkeby test network.",
+      choices: ['ganacheDogeRegtest', 'ganacheDogeMainnet', 'rinkeby'],
       demandOption: false
     })
     .option('t', {
@@ -62,7 +62,7 @@ module.exports = {
     } else if (ethnetwork == 'ganacheDogeMainnet') {
       dogeTokenJsonPath = argv.json;
       ethNetworkId = '32000';
-    } else if (ethnetwork == 'ropsten') {
+    } else if (ethnetwork == 'rinkeby') {
       dogeTokenJsonPath = path.resolve(__dirname, 'json/DogeToken.json');
       ethNetworkId = '3';
     }

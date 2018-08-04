@@ -10,7 +10,7 @@ async function doIt() {
         demandOption: true
       })
       .usage('Prints eth and doge token balances of an eth address.\nUsage: node user/print-balances.js --ethnetwork <eth network> --address <eth address>')
-      .example('node user/print-balances.js --ethnetwork ropsten --address 0xd2394f3fad76167e7583a876c292c86ed1ffffff')
+      .example('node user/print-balances.js --ethnetwork rinkeby --address 0xd2394f3fad76167e7583a876c292c86ed1ffffff')
     ).argv;
 
   var initObjects = utils.init(argv);

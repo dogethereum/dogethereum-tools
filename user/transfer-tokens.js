@@ -23,7 +23,7 @@ async function doIt() {
         demandOption: true
       })
       .usage('Transfers doge tokens from one user to another.\nUsage: node user/transfer-tokens.js --ethnetwork <eth network> --sender <from eth address> --receiver <to eth address> --value <number of tokens>')
-      .example('node user/transfer-tokens.js --ethnetwork ropsten --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1')      
+      .example('node user/transfer-tokens.js --ethnetwork rinkeby --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1')      
     ).argv;
 
   var initObjects = utils.init(argv);
