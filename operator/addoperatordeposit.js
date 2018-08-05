@@ -47,7 +47,7 @@ async function doIt() {
 
   var dt = await DogeToken.deployed();
 
-  await printOperatorDeposit(web3, dt, operatorPublicKeyHash);
+  await printOperatorDeposit(web3, dt, operatorPublicKeyHash, "Current operator deposit : ");
 
   // Add operator deposit
   console.log("Adding operator deposit... ");
@@ -55,12 +55,12 @@ async function doIt() {
   const addOperatorDepositTxReceipt = await dt.addOperatorDeposit(operatorPublicKeyHash, {value: value, from : operatorEthAddress, gas: 50000, gasPrice: argv.gasPrice});
   utils.printTxResult(addOperatorDepositTxReceipt, "Add operator deposit");
 
-  await printOperatorDeposit(web3, dt, operatorPublicKeyHash);
+  await printOperatorDeposit(web3, dt, operatorPublicKeyHash, "Updated operator deposit : ");
 }
 
-async function printOperatorDeposit(web3, dt, operatorPublicKeyHash) {
+async function printOperatorDeposit(web3, dt, operatorPublicKeyHash, label) {
   var operator = await dt.operators.call(operatorPublicKeyHash);     
-  console.log("Operator deposit : " + web3.fromWei(operator[4].toNumber())  + " eth.");       
+  console.log(label + web3.fromWei(operator[4].toNumber())  + " eth.");       
 }
 
 
