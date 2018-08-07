@@ -16,8 +16,8 @@ async function doIt() {
       .option('dp', {
         group: 'Optional:',
         alias: 'dogeport',
-        default: 44555, //mainnet: 22555 or testnet: 44555
-        describe: 'port of the dogecoin node',
+        default: 22555, //mainnet: 22555 or testnet: 44555
+        describe: 'port of the dogecoin node rpc',
         type: 'number',
         check: val => val >= 1 && val <= 65535,
         demandOption: false
