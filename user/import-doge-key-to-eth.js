@@ -48,6 +48,7 @@ async function doIt() {
   var password = argv.password;
   var unlock = argv.unlock;
   var unlockTime = argv.unlockTime;
+  var ethnetwork = argv.ethnetwork;
 
   console.log("Import doge key to eth " + privateKey + ", password " + (password!='' ? password : "<empty>") + ", unlock " + unlock + ", unlock time " + (unlockTime!=0 ? unlockTime :"<forever>") + ".");
 
@@ -56,7 +57,13 @@ async function doIt() {
     return;
   }
 
-  // Add senderPrivateKey to eth node (if already added, this makes no harm)
+  if (ethnetwork == "rinkeby") {
+    // Fix weird difference between ganache and geth
+    // geth expects private keys without the 0x
+    // ganache expects private keys with the 0x
+    privateKey = utils.remove0x(privateKey);
+  }
+  // Add privateKey to eth node (if already added, this makes no harm)
   var dogeTokenHolderAddress = await web3.personal.importRawKey(privateKey, password);  
   console.log("Imported key for address " + dogeTokenHolderAddress);
   if (unlock) {
