@@ -63,7 +63,9 @@ async function doIt() {
     // ganache expects private keys with the 0x
     privateKey = utils.remove0x(privateKey);
   }
-  // Add privateKey to eth node (if already added, this makes no harm)
+  // Add privateKey to eth node
+  // geth fails if already added
+  // ganache does nothing if already added
   var dogeTokenHolderAddress = await web3.personal.importRawKey(privateKey, password);  
   console.log("Imported key for address " + dogeTokenHolderAddress);
   if (unlock) {
