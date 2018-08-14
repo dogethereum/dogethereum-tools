@@ -28,6 +28,7 @@ async function doIt() {
 
   var initObjects = utils.init(argv);
   var web3 = initObjects.web3;
+  web3.eth.getTransactionReceiptMined = require("../getTransactionReceiptMined");
   var DogeToken = initObjects.DogeToken;
 
   var sender = argv.sender;
@@ -51,8 +52,11 @@ async function doIt() {
   var receiverEthBalance = await web3.eth.getBalance(receiver);     
   console.log("Receiver balance : " + web3.fromWei(receiverEthBalance.toNumber()) + " eth.");
   console.log("Sending transaction...");  
-  await web3.eth.sendTransaction({from: sender, to: receiver, value: value});  
+  var txHash = await web3.eth.sendTransaction({from: sender, to: receiver, value: value});  
   console.log("Transaction sent.");  
+  console.log("Waiting transaction to be included in a block...");  
+  await web3.eth.getTransactionReceiptMined(txHash);
+  console.log("Transaction included in a block.");  
   var senderEthBalance = await web3.eth.getBalance(sender);     
   console.log("Sender balance : " + web3.fromWei(senderEthBalance.toNumber()) + " eth.");
   var receiverEthBalance = await web3.eth.getBalance(receiver);     
