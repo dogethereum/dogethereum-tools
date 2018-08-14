@@ -110,6 +110,17 @@ eg:
 
 `node operator/addoperatordeposit.js --ethnetwork rinkeby --operatorPublicKeyHash 0x03cd041b0139d3240607b9fd1b2d1b691e22b5d6 --value 1000000000000000000 --ethAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff`
 
+#### Print status
+
+Prints operator status.
+
+`node operator/print-status.js --ethnetwork <eth network> --operatorPublicKeyHash <operator public key hash>`
+
+eg:
+
+`node operator/print-status.js --ethnetwork rinkeby --operatorPublicKeyHash 0x03cd041b0139d3240607b9fd1b2d1b691e22b5d6`
+
+
 
 #### Withdraw operator deposit
 
