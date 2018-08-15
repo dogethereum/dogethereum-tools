@@ -150,7 +150,7 @@ async function doIt() {
         var dumpprivkeyResult = await invokeDogecoinRpc(dogecoinRpc, "dumpprivkey", userDogecoinAddress);
         var userPrivKeyInDogeFormat = dumpprivkeyResult.result;
         var userPrivKeyInEthFormat = formatconverter.privKeyToEthFormat(userPrivKeyInDogeFormat)
-        console.log("User private key in eth format : " + "0x" + userPrivKeyInEthFormat);
+        console.log("User private key : " + "0x" + userPrivKeyInEthFormat);
         var userEthAddress = formatconverter.getEthAddress(userPrivKeyInDogeFormat)
         console.log("User eth address : " + "0x" + userEthAddress);
       }
