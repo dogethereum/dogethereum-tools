@@ -75,7 +75,7 @@ async function doIt() {
       if (dogeAvailableBalance >= minUnlockValue) {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE  
         var valueToUnlockWithThisOperator = Math.min(valueToUnlock - valueUnlocked, dogeAvailableBalance);
-        console.log("Unlocking " + valueToUnlockWithThisOperator + " DogeTokens using operator " + operatorPublicKeyHash);             
+        console.log("Unlocking " + utils.satoshiToDoge(valueToUnlockWithThisOperator) + " doge tokens using operator " + operatorPublicKeyHash);             
         const unlockTxReceipt = await dt.doUnlock(dogeDestinationAddress, valueToUnlock, operatorPublicKeyHash, {from: sender, gas: 350000, gasPrice: argv.gasPrice});
         utils.printTxResult(unlockTxReceipt, "Unlock");
         if (!(unlockTxReceipt.logs.length == 1 && unlockTxReceipt.logs[0].event == "ErrorDogeToken")) {
@@ -88,9 +88,9 @@ async function doIt() {
       break;
     }
   }
-  console.log("Total unlocked " + valueUnlocked + " DogeTokens from " + sender);    
+  console.log("Total unlocked " + utils.satoshiToDoge(valueUnlocked) + " doge tokens from address " + sender);    
 
-  console.log("Unlock Done.");
+  console.log("Unlock done.");
   await utils.printDogeTokenBalances(dt, sender);
 }
 
