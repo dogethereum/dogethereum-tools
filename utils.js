@@ -4,7 +4,6 @@ var path = require('path');
 var fs = require('fs');
 var pkg = require("./package.json");
 
-
 module.exports = {
   completeYargs: function (yargs) {
     return yargs
@@ -40,13 +39,13 @@ module.exports = {
     .option('j', {
       group: 'Connection:',
       alias: 'json',
-      describe: "Location of the truffle DogeToken json. Just to be using during development on 'ganacheDogeRegtest' or 'ganacheDogeMainnet' network.",
+      describe: "Location of the truffle DogeToken json. Just to be using during development on 'ganacheDogeRegtest' or 'ganacheDogeMainnet' networks.",
       demandOption: false
     })
     .showHelpOnFail(false, 'Specify -h, -? or --help for available options') 
     .help('h')
     .alias('h', ['?', 'help'])
-    .version(pkg.version);
+    .version("Dogethereum tools " + pkg.version);
   }
   ,
   init: function (argv) {
