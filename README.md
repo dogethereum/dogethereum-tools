@@ -15,6 +15,13 @@ If you are new to the Dogecoin <-> Ethereum bridge, please check the [docs](http
 - `cd dogethereum-tools`
 - `npm install`
 
+## Upgrading
+If you are using an old version of the tools, you can upgrade to the latest one:
+- `cd dogethereum-tools`
+- `git pull`
+- `npm install`
+
+
 ## Using the tools
 
 ### User tools
