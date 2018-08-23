@@ -135,7 +135,7 @@ async function doIt() {
           var walletpassphraseResult = await invokeDogecoinRpc(dogecoinRpc, "walletpassphrase", argv.dogewalletpassphrase, 30);
         }
         var sendtoaddressResult = await invokeDogecoinRpc(dogecoinRpc, "sendtoaddress", operatorDogeAddress, utils.satoshiToDoge(valueToLockWithThisOperator));
-        console.log("Sent doge tx 0x" + sendtoaddressResult.result);        
+        console.log("Sent doge tx " + sendtoaddressResult.result);        
         valueLocked += valueToLockWithThisOperator;
 
         // Get the dogecoin address of the first input
