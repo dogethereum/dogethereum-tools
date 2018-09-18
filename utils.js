@@ -93,7 +93,7 @@ module.exports = {
         return false;
       } else {
         console.log("Sender eth balance : " + web3.fromWei(senderEthBalance.toNumber()) + " eth. Please, make sure that is enough to pay for the tx fee.");
-      }      
+      }    
     }
     return true;
   }
@@ -127,8 +127,8 @@ module.exports = {
   ,
   remove0x: function (str) {
     return (str.indexOf("0x")==0) ? str.substring(2) : str;
-  }  
-}  
+  }
+}
 
 
 
