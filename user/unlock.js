@@ -1,5 +1,6 @@
 var utils = require('../utils');
 var yargs = require('yargs');
+var bitcoreLib = require('bitcore-lib');
 
 async function doIt() {
   var argv = utils.completeYargs(yargs
@@ -30,10 +31,24 @@ async function doIt() {
   var web3 = initObjects.web3;
   var DogeToken = initObjects.DogeToken;
 
-
   var sender = argv.sender;
   var dogeDestinationAddress = argv.receiver;
   var valueToUnlock = argv.value;
+
+
+  // Check address validity
+  let decodedDogeAddress;
+  try {
+    decodedDogeAddress = bitcoreLib.encoding.Base58Check(dogeDestinationAddress);
+  } catch(err) {
+    console.log("Error: Bad Doge destination address");
+    return false;
+  }  
+  // Check if address version is valid for Dogecoin
+  if (!(dogeDestinationAddress[0] == 'D' && /[ABCDEFGHJKLMNPQRSTUVWXYZ123456789]/.test(dogeDestinationAddress[1]))) {
+    console.log("Error: Bad Doge destination address version");
+    return false;
+  }
 
   console.log("Unlock " + utils.satoshiToDoge(valueToUnlock) + " doge tokens from " + sender + " to " + dogeDestinationAddress + ".");
 
@@ -53,7 +68,7 @@ async function doIt() {
   if (valueToUnlock > senderDogeTokenBalance.toNumber()) {
     console.log("Error: Sender doge token balance is not enough.");
     return;
-  }     
+  }
 
   // Do unlock
   console.log("Initiating unlock... ");
@@ -62,10 +77,10 @@ async function doIt() {
   if(valueToUnlock < minUnlockValue) {
     console.log("Value to unlock " + valueToUnlock + " should be at least " + minUnlockValue);
     return false;
-  }  
+  }
   const operatorsLength = await dt.getOperatorsLength();
   var valueUnlocked = 0;
-  for (var i = 0; i < operatorsLength; i++) {      
+  for (var i = 0; i < operatorsLength; i++) {
     let operatorKey = await dt.operatorKeys(i);
     if (operatorKey[1] == false) {
       // not deleted
@@ -75,20 +90,24 @@ async function doIt() {
       if (dogeAvailableBalance >= minUnlockValue) {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE  
         var valueToUnlockWithThisOperator = Math.min(valueToUnlock - valueUnlocked, dogeAvailableBalance);
-        console.log("Unlocking " + utils.satoshiToDoge(valueToUnlockWithThisOperator) + " doge tokens using operator " + operatorPublicKeyHash);             
-        const unlockTxReceipt = await dt.doUnlock(dogeDestinationAddress, valueToUnlockWithThisOperator, operatorPublicKeyHash, {from: sender, gas: 500000, gasPrice: argv.gasPrice});
+        console.log("Unlocking " + utils.satoshiToDoge(valueToUnlockWithThisOperator) + " doge tokens using operator " + operatorPublicKeyHash);
+
+        // Format address as bytes20 for contracts
+        decodedDogeAddress = "0x" + decodedDogeAddress.toString('hex').slice(2, 42);
+        const unlockTxReceipt = await dt.doUnlock(decodedDogeAddress, valueToUnlockWithThisOperator,
+            operatorPublicKeyHash, {from: sender, gas: 500000, gasPrice: argv.gasPrice});
         utils.printTxResult(unlockTxReceipt, "Unlock");
         if (!(unlockTxReceipt.logs.length == 1 && unlockTxReceipt.logs[0].event == "ErrorDogeToken")) {
           // unlock succeded
           valueUnlocked += valueToUnlockWithThisOperator;
-        }        
+        }
       }
     }
     if (valueUnlocked == valueToUnlock) {
       break;
     }
   }
-  console.log("Total unlocked " + utils.satoshiToDoge(valueUnlocked) + " doge tokens from address " + sender);    
+  console.log("Total unlocked " + utils.satoshiToDoge(valueUnlocked) + " doge tokens from address " + sender);
 
   console.log("Unlock done.");
   await utils.printDogeTokenBalances(dt, sender);
