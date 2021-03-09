@@ -5,8 +5,8 @@ Set of tools to be used by end users and operators to interact with https://gith
 If you are new to the Dogecoin <-> Ethereum bridge, please check the [docs](https://github.com/dogethereum/docs) repository first.
 
 ## Requirements
-- npm version 5.5.1 or later.
-- node version 9.2.0 or later.
+- npm version 7.3.0 or later.
+- node version 15.5.1 or later.
 - Dogecoin node running with RPC interface enabled.
 - Ethereum node running with RPC interface enabled without password on port 8545.
 
