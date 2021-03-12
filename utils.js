@@ -1,134 +1,157 @@
-var Web3 = require('web3');
-var contract = require("truffle-contract");
-var path = require('path');
-var fs = require('fs');
-var pkg = require("./package.json");
+const Web3 = require("web3");
+const path = require("path");
+const fs = require("fs");
 
-module.exports = {
-  completeYargs: function (yargs) {
-    return yargs
-    .option('n', {
-      group: 'Connection:',
-      alias: 'ethnetwork',
+const pkg = require("./package.json");
+
+function completeYargs(yargs) {
+  return yargs
+    .option("n", {
+      group: "Connection:",
+      alias: "ethnetwork",
       describe: "Eth network to be used",
       default: "rinkeby",
       defaultDescription: "Rinkeby test network.",
-      choices: ['ganacheDogeRegtest', 'ganacheDogeMainnet', 'rinkeby'],
-      demandOption: false
+      deprecated: true,
+      type: "string",
+      choices: ["ganacheDogeRegtest", "ganacheDogeMainnet", "rinkeby"],
+      demandOption: false,
     })
-    .option('t', {
-      group: 'Connection:',
-      alias: 'host',
-      default: '127.0.0.1',
-      describe: 'host of the ethereum node'
+    .option("t", {
+      group: "Connection:",
+      alias: "host",
+      default: "127.0.0.1",
+      type: "string",
+      describe: "host of the ethereum node",
     })
-    .option('p', {
-      group: 'Connection:',
-      alias: 'port',
+    .option("p", {
+      group: "Connection:",
+      alias: "port",
       default: 8545,
-      describe: 'port of the ethereum node',
-      check: val => val >= 1 && val <= 65535
+      type: "number",
+      describe: "port of the ethereum node",
+      check: (val) => val >= 1 && val <= 65535,
     })
-    .option('g', {
-      group: 'Connection:',
-      alias: 'gasPrice',
-      describe: 'The price of gas in wei',
-      type: 'number',
-      default: 20000000000
+    .option("g", {
+      group: "Connection:",
+      alias: "gasPrice",
+      describe: "The price of gas in wei",
+      type: "number",
+      default: 20000000000,
     })
-    .option('j', {
-      group: 'Connection:',
-      alias: 'json',
-      describe: "Location of the truffle DogeToken json. Just to be using during development on 'ganacheDogeRegtest' or 'ganacheDogeMainnet' networks.",
-      demandOption: false
+    .option("j", {
+      group: "Connection:",
+      alias: "deployment",
+      describe:
+        "Location of the deployment artifact json. Useful during development on 'ganacheDogeRegtest' or 'ganacheDogeMainnet' networks.",
+      type: "string",
+      demandOption: false,
     })
-    .showHelpOnFail(false, 'Specify -h, -? or --help for available options') 
-    .help('h')
-    .alias('h', ['?', 'help'])
-    .version("Dogethereum tools " + pkg.version);
-  }
-  ,
-  init: function (argv) {
-    var provider = new Web3.providers.HttpProvider("http://" + argv.host + ":" + argv.port);
-    var web3 = new Web3(provider);
+    .showHelpOnFail(false, "Specify -h, -? or --help for available options")
+    .help("h")
+    .alias("h", ["?", "help"])
+    .version(`Dogethereum tools ${pkg.version}`);
+}
 
-    var ethnetwork = argv.ethnetwork;
-    var dogeTokenJsonPath;
-    var ethNetworkId;
-    if (ethnetwork == 'ganacheDogeRegtest') {
-      dogeTokenJsonPath = argv.json;
-      ethNetworkId = '32001';
-    } else if (ethnetwork == 'ganacheDogeMainnet') {
-      dogeTokenJsonPath = argv.json;
-      ethNetworkId = '32000';
-    } else if (ethnetwork == 'rinkeby') {
-      dogeTokenJsonPath = path.resolve(__dirname, 'json/DogeToken.json');
-      ethNetworkId = '3';
-    }
-    const DogeTokenJson = JSON.parse(fs.readFileSync(dogeTokenJsonPath));
-    const DogeToken = contract(DogeTokenJson);
-    DogeToken.setNetwork(ethNetworkId);
-    DogeToken.setProvider(provider);  
-    return {web3: web3, argv : argv, DogeToken: DogeToken};
-  }
-  ,
-  doSomeChecks: async function (web3, sender) {
-    // Do some checks
-    if(!web3.isConnected()) {
-      console.log("Can't connect to ethereum node.");
-      return false;
-    }
-    if (sender) {
-      try {
-        web3.eth.sign(sender, "0x123456");
-      } catch(err) {
-        console.log("Can't use sender private key. Please, make sure the connected ethereum node has sender private key and that account is unlocked.");
-        console.log(err);
-        return false;
-      }
-      // Make sure sender has some eth to pay for txs
-      var senderEthBalance = await web3.eth.getBalance(sender);     
-      if (senderEthBalance.toNumber() == 0) {
-        console.log("Sender address has no eth balance, aborting.");
-        return false;
-      } else {
-        console.log("Sender eth balance : " + web3.fromWei(senderEthBalance.toNumber()) + " eth. Please, make sure that is enough to pay for the tx fee.");
-      }    
-    }
-    return true;
-  }
-  ,
-  printDogeTokenBalances: async function (dt, sender, receiver) {
-    // Print sender DogeToken balance
-    var senderDogeTokenBalance = await dt.balanceOf.call(sender);     
-    console.log("Sender doge token balance : " + module.exports.satoshiToDoge(senderDogeTokenBalance.toNumber())  + " doge tokens.");     
+function init(argv) {
+  const web3 = new Web3(`http://${argv.host}:${argv.port}`);
 
-    if (receiver) {
-      // Print receiver DogeToken balance
-      var receiverDogeTokenBalance = await dt.balanceOf.call(receiver);     
-      console.log("Receiver doge token balance : " + module.exports.satoshiToDoge(receiverDogeTokenBalance.toNumber())  + " doge tokens.");               
-    }
+  const deploymentPath = argv.deployment
+    ? argv.deployment
+    : path.resolve(__dirname, "deployment/deployment.json");
+  const deployment = JSON.parse(fs.readFileSync(deploymentPath));
+
+  const contracts = loadDeployment(web3, deployment);
+  return { web3, argv, ...contracts };
+}
+
+async function loadDeployment(web3, deployment) {
+  const chainId = await web3.eth.getChainId();
+  if (chainId !== deployment.chainId) {
+    throw new Error(
+      `Expected a deployment for network with chainId ${chainId} but found chainId ${deployment.chainId} instead.`
+    );
   }
-  ,
-  satoshiToDoge: function (num) {
-    return num / 100000000;
-  }
-  ,
-  printTxResult: function (txReceipt, operation) {
-    if (txReceipt.logs.length == 1 && txReceipt.logs[0].event == "ErrorDogeToken") {
-      console.log(operation + " failed!. Error : " + txReceipt.logs[0].args.err.toNumber());
+
+  const dogeTokenArtifact = deployment.contracts.dogeToken;
+
+  return {
+    dogeToken: new web3.eth.Contract(
+      dogeTokenArtifact.abi,
+      dogeTokenArtifact.address
+    ),
+  };
+}
+
+async function doSomeChecks(web3, sender) {
+  // Do some checks
+  if (sender !== undefined) {
+    // Make sure sender has some eth to pay for txs
+    const senderEthBalance = await web3.eth.getBalance(sender);
+    if (senderEthBalance === "0") {
+      throw new Error("Sender address has no eth balance, aborting.");
     } else {
-      console.log(operation + " done.");
+      console.log(
+        `Sender eth balance: ${web3.utils.fromWei(
+          senderEthBalance
+        )} eth. Please, make sure that is enough to pay for the tx fee.`
+      );
     }
-  },
-  fromHex: function (data) {
-    return Buffer.from(module.exports.remove0x(data), 'hex');
-  }
-  ,
-  remove0x: function (str) {
-    return (str.indexOf("0x")==0) ? str.substring(2) : str;
   }
 }
 
+async function printDogeTokenBalances(dt, sender, receiver) {
+  // Print sender DogeToken balance
+  const senderDogeTokenBalance = await dt.balanceOf.call(sender);
+  console.log(
+    `Sender doge token balance: ${satoshiToDoge(
+      senderDogeTokenBalance.toNumber()
+    )} doge tokens.`
+  );
 
+  if (receiver !== undefined) {
+    // Print receiver DogeToken balance
+    const receiverDogeTokenBalance = await dt.balanceOf.call(receiver);
+    console.log(
+      `Receiver doge token balance: ${satoshiToDoge(
+        receiverDogeTokenBalance.toNumber()
+      )} doge tokens.`
+    );
+  }
+}
 
+function satoshiToDoge(dogeSatoshis) {
+  return dogeSatoshis / 100000000;
+}
+
+function printTxResult(txReceipt, operation) {
+  if (
+    txReceipt.logs.length == 1 &&
+    txReceipt.logs[0].event == "ErrorDogeToken"
+  ) {
+    console.log(
+      `${operation} failed!. Error: ${txReceipt.logs[0].args.err.toNumber()}`
+    );
+  } else {
+    console.log(`${operation} done.`);
+  }
+}
+
+function fromHex(data) {
+  return Buffer.from(remove0x(data), "hex");
+}
+
+function remove0x(str) {
+  return str.startsWith("0x") ? str.substring(2) : str;
+}
+
+module.exports = {
+  completeYargs,
+  init,
+  doSomeChecks,
+  printDogeTokenBalances,
+  satoshiToDoge,
+  printTxResult,
+  fromHex,
+  remove0x,
+};
