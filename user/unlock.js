@@ -7,7 +7,7 @@ const bitcoreLib = require("bitcore-lib");
 async function doIt() {
   const argv = utils.completeYargs(
     yargs
-      .option("s", {
+      .option("pk", {
         group: "Data:",
         alias: "privateKey",
         type: "string",
