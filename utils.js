@@ -9,9 +9,7 @@ function completeYargs(yargs) {
     .option("n", {
       group: "Connection:",
       alias: "ethnetwork",
-      describe: "Eth network to be used",
-      default: "rinkeby",
-      defaultDescription: "Rinkeby test network.",
+      describe: "Eth network to be used. This option is ignored.",
       deprecated: true,
       type: "string",
       choices: ["ganacheDogeRegtest", "ganacheDogeMainnet", "rinkeby"],
