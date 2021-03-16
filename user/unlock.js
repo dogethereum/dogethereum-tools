@@ -30,10 +30,10 @@ async function doIt() {
       })
       .usage(
         `Converts doge tokens on the eth blockchain to doges on the dogecoin blockchain.
-Usage: node user/unlock.js --ethnetwork <eth network> --sender <from eth account> --receiver <to doge address> --value <number of tokens>`
+Usage: node user/unlock.js --privateKey <sender eth private key> --receiver <to doge address> --value <number of tokens>`
       )
       .example(
-        "node user/unlock.js --ethnetwork rinkeby --privateKey 0xf968fec769bdd389e33755d6b8a704c04e3ab958f99cc6a8b2bcf467807f9634 --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000",
+        "node user/unlock.js --privateKey 0xf968fec769bdd389e33755d6b8a704c04e3ab958f99cc6a8b2bcf467807f9634 --receiver ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P --value 300000000",
         "Send 3 doge tokens to unlock 3 dogecoins and send them to ncbC7ZY1K9EcMVjvwbgSBWKQ4bwDWS4d5P."
       )
   ).argv;
@@ -44,6 +44,7 @@ Usage: node user/unlock.js --ethnetwork <eth network> --sender <from eth account
     privateKey,
     receiver: dogeDestinationAddress,
     value: valueToUnlock,
+    gasPrice
   } = argv;
 
   const account = web3.eth.accounts.privateKeyToAccount(privateKey);
@@ -125,7 +126,7 @@ Decoder error: ${err.message}`);
           decodedDogeAddress,
           valueToUnlockWithThisOperator,
           operatorPublicKeyHash,
-          { from: sender, gas: 500000, gasPrice: argv.gasPrice }
+          { from: sender, gas: 500000, gasPrice }
         );
         utils.printTxResult(unlockTxReceipt, "Unlock");
         if (
