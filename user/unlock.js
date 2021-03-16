@@ -45,10 +45,10 @@ async function doIt() {
     return false;
   }  
   // Check if address version is valid for Dogecoin
-  if (!(dogeDestinationAddress[0] == 'D' && /[ABCDEFGHJKLMNPQRSTUVWXYZ123456789]/.test(dogeDestinationAddress[1]))) {
-    console.log("Error: Bad Doge destination address version");
-    return false;
-  }
+  // if (!(dogeDestinationAddress[0] == 'D' && /[ABCDEFGHJKLMNPQRSTUVWXYZ123456789]/.test(dogeDestinationAddress[1]))) {
+  //   console.log("Error: Bad Doge destination address version");
+  //   return false;
+  // }
 
   console.log("Unlock " + utils.satoshiToDoge(valueToUnlock) + " doge tokens from " + sender + " to " + dogeDestinationAddress + ".");
 
