@@ -14,10 +14,10 @@ async function doIt() {
       })
       .usage(
         `Prints eth and doge token balances of an eth address.
-Usage: node user/print-balances.js --ethnetwork <eth network> --address <eth address>`
+Usage: node user/print-balances.js --address <eth address>`
       )
       .example(
-        "node user/print-balances.js --ethnetwork rinkeby --address 0xd2394f3fad76167e7583a876c292c86ed1ffffff"
+        "node user/print-balances.js --address 0xd2394f3fad76167e7583a876c292c86ed1ffffff"
       )
   ).argv;
 
@@ -31,7 +31,7 @@ Usage: node user/print-balances.js --ethnetwork <eth network> --address <eth add
   await utils.doSomeChecks(web3);
 
   const ethBalance = await web3.eth.getBalance(address);
-  console.log(`Eth balance: ${web3.fromWei(ethBalance.toNumber())} eth.`);
+  console.log(`Eth balance: ${web3.utils.fromWei(ethBalance)} eth.`);
   const dogeTokenBalance = await dogeToken.balanceOf.call(address);
   console.log(
     `Doge token balance: ${utils.satoshiToDoge(
