@@ -6,10 +6,11 @@ const yargs = require("yargs");
 async function doIt() {
   const argv = utils.completeYargs(
     yargs
-      .option("s", {
+      .option("pk", {
         group: "Data:",
-        alias: "sender",
-        describe: "from eth address",
+        alias: "privateKey",
+        type: "string",
+        describe: "private key used to sign the transaction",
         demandOption: true,
       })
       .option("r", {
@@ -27,16 +28,21 @@ async function doIt() {
       })
       .usage(
         `Transfers doge tokens from one user to another.
-Usage: node user/transfer-tokens.js --ethnetwork <eth network> --sender <from eth address> --receiver <to eth address> --value <number of tokens>`
+Usage: node user/transfer-tokens.js --privateKey <sender eth private key> --receiver <to eth address> --value <number of tokens>`
       )
       .example(
-        "node user/transfer-tokens.js --ethnetwork rinkeby --sender 0xd2394f3fad76167e7583a876c292c86ed10305da --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1"
+        "node user/transfer-tokens.js --privateKey 0xf968fec769bdd389e33755d6b8a704c04e3ab958f99cc6a8b2bcf467807f9634 --receiver 0xd2394f3fad76167e7583a876c292c86ed1ffffff --value 1",
+        "Send 1 satoshi of doge token to 0xd2394f3fad76167e7583a876c292c86ed1ffffff."
       )
   ).argv;
 
   const { web3, dogeToken } = utils.init(argv);
 
-  const sender = argv.sender;
+  const privateKey = argv.privateKey;
+  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+  web3.eth.accounts.wallet.add(account);
+  const sender = account.address;
+
   const receiver = argv.receiver;
   const value = argv.value;
 
