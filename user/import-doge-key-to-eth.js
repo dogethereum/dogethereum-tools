@@ -1,6 +1,8 @@
 var utils = require('../utils');
 var yargs = require('yargs');
 
+// This script is deprecated. Private keys are not imported into the ethereum node any longer.
+
 async function doIt() {
   var argv = utils.completeYargs(yargs
       .option('k', {
