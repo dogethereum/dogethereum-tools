@@ -4,6 +4,16 @@ const utils = require("../utils");
 const yargs = require("yargs");
 const bitcoreLib = require("bitcore-lib");
 
+
+/**
+ * This implements the user "crossing" the bridge from ethereum to dogecoin.
+ * The user redeems an amount of doge tokens with one or more operators to get
+ * an equivalent amount of dogecoin in the dogecoin network.
+ *
+ * @dev Note that this is a naive implementation. It eagerly redeems doge tokens
+ * with the first operator in the doge token contract and proceeds to the
+ * next operator if the requested amount was not reached.
+ */
 async function doIt() {
   const argv = utils.completeYargs(
     yargs
