@@ -39,7 +39,7 @@ async function doIt() {
   // Check address validity
   let decodedDogeAddress;
   try {
-    decodedDogeAddress = bitcoreLib.encoding.Base58Check(dogeDestinationAddress);
+    decodedDogeAddress = bitcoreLib.encoding.Base58Check.decode(dogeDestinationAddress);
   } catch(err) {
     console.log("Error: Bad Doge destination address");
     return false;
