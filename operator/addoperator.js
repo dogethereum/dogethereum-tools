@@ -2,7 +2,6 @@ var utils = require('../utils');
 var yargs = require('yargs');
 var bitcoreLib = require('bitcore-lib');
 var ECDSA = bitcoreLib.crypto.ECDSA;
-var bitcoreMessage = require('bitcore-message');
 
 
 
