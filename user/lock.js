@@ -6,6 +6,15 @@ const yargs = require("yargs");
 const BitcoindRpc = require("bitcoind-rpc");
 const bitcoreLib = require("bitcore-lib");
 
+/**
+ * This implements the user "crossing" the bridge from dogecoin to ethereum.
+ * The user deposits an amount of dogecoin with one or more operators to get
+ * an equivalent amount of doge tokens in the ethereum network.
+ *
+ * @dev Note that this is a naive implementation. It eagerly locks dogecoin
+ * with the first operator in the doge token contract and proceeds to the
+ * next operator if the requested amount was not reached.
+ */
 async function doIt() {
   const argv = utils.completeYargs(
     yargs
@@ -68,9 +77,10 @@ async function doIt() {
         demandOption: true,
       })
       .usage(
-        "Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.\nUsage: node user/lock.js --ethnetwork <eth network>  --value <number of doge satoshis>"
+        `Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.
+Usage: node user/lock.js --value <number of doge satoshis>`
       )
-      .example("node user/lock.js --ethnetwork rinkeby --value 200000000")
+      .example("node user/lock.js --value 200000000", "Add ")
   ).argv;
 
   const { web3, dogeToken } = utils.init(argv);
