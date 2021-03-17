@@ -87,7 +87,7 @@ Usage: node user/lock.js --value <number of doge satoshis>`
 
   const valueToLock = argv.value;
 
-  console.log("Lock " + utils.satoshiToDoge(valueToLock) + " doges.");
+  console.log(`Lock ${utils.satoshiToDoge(valueToLock)} doges.`);
 
   const dogeRpcConfig = {
     protocol: "http",
