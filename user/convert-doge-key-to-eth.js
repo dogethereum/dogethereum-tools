@@ -32,7 +32,7 @@ Usage: node user/convert-doge-key-to-eth.js --privateKey <private key in eth for
 
   const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-  console.log(`Got key for Ethereum address ${dogeTokenHolderAddress}.
+  console.log(`Got key for Ethereum address ${account.address}.
 Ethereum private key: ${privateKey}`);
 }
 
