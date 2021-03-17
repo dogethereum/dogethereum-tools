@@ -207,11 +207,12 @@ Usage: node user/lock.js --value <number of doge satoshis>`
         const userPrivKeyInEthFormat = formatconverter.privKeyToEthFormat(
           userPrivKeyInDogeFormat
         );
-        console.log(`User private key: 0x${userPrivKeyInEthFormat}`);
+        console.log(`User private key: ${userPrivKeyInEthFormat}`);
         const userEthAddress = formatconverter.getEthAddress(
+          web3,
           userPrivKeyInDogeFormat
         );
-        console.log(`User eth address: 0x${userEthAddress}`);
+        console.log(`User eth address: ${userEthAddress}`);
       }
     }
     if (valueLocked == valueToLock) {

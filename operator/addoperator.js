@@ -8,7 +8,7 @@ const ECDSA = bitcoreLib.crypto.ECDSA;
 async function doIt() {
   const argv = utils.completeYargs(
     yargs
-      .option("k", {
+      .option("dk", {
         group: "Data:",
         alias: "dogePrivateKey",
         describe: "operator private key used in dogecoin blockchain",

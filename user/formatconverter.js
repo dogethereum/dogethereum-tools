@@ -1,30 +1,29 @@
 "use strict";
 
 const bitcoreLib = require("bitcore-lib");
-const wallet = require("ethereumjs-wallet");
 
 function keyDogeToEthInBytes(privKeyAsExportedByDogecoinDumpprivkey) {
   const decodedKey = bitcoreLib.encoding.Base58.decode(
     privKeyAsExportedByDogecoinDumpprivkey
   );
   const privKeyBytes = decodedKey.slice(1, decodedKey.length - 5);
-  return privKeyBytes;
+  return Buffer.from(privKeyBytes);
 }
 
 function privKeyToEthFormat(dogePrivateKey) {
   const privKeyBytes = keyDogeToEthInBytes(dogePrivateKey);
-  const privKeyInEthFormat = Buffer.from(privKeyBytes).toString("hex");
+  const privKeyInEthFormat = `0x${privKeyBytes.toString("hex")}`;
   return privKeyInEthFormat;
 }
 
-function getEthAddress(dogePrivateKey) {
-  const myWallet = wallet.fromPrivateKey(
-    new Buffer(keyDogeToEthInBytes(dogePrivateKey))
+function getEthAddress(web3, dogePrivateKey) {
+  const myWallet = web3.eth.accounts.privateKeyToAccount(
+    privKeyToEthFormat(dogePrivateKey)
   );
-  const addressInEthFormat = myWallet.getAddress();
-  return addressInEthFormat.toString("hex");
+  return myWallet.address;
 }
 module.exports = {
   privKeyToEthFormat,
   getEthAddress,
+  keyDogeToEthInBytes,
 };
