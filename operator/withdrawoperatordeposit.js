@@ -62,11 +62,9 @@ Usage: node operator/withdrawoperatordeposit.js --operatorPublicKeyHash <operato
 
   // Withdraw operator deposit
   console.log("Withdrawing operator deposit...");
-  const withdrawOperatorDepositTxReceipt = await dogeToken.withdrawOperatorDeposit(
-    operatorPublicKeyHash,
-    value,
-    { from: operatorEthAddress, gas: 50000, gasPrice: argv.gasPrice }
-  );
+  const withdrawOperatorDepositTxReceipt = await dogeToken.methods
+    .withdrawOperatorDeposit(operatorPublicKeyHash, value)
+    .send({ from: operatorEthAddress, gas: 50000, gasPrice: argv.gasPrice });
   utils.printTxResult(
     withdrawOperatorDepositTxReceipt,
     "Withdraw operator deposit"
@@ -76,7 +74,9 @@ Usage: node operator/withdrawoperatordeposit.js --operatorPublicKeyHash <operato
 }
 
 async function printOperatorDeposit(web3, dogeToken, operatorPublicKeyHash) {
-  const operator = await dogeToken.operators.call(operatorPublicKeyHash);
+  const operator = await dogeToken.methods
+    .operators(operatorPublicKeyHash)
+    .call();
   console.log(`Operator deposit: ${web3.utils.fromWei(operator[4])} eth.`);
 }
 

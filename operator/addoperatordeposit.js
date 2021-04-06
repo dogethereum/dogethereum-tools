@@ -68,15 +68,14 @@ Usage: node operator/addoperatordeposit.js --operatorPublicKeyHash <operator pub
   // Add operator deposit
   console.log("Adding operator deposit...");
   // TODO: check gas costs
-  const addOperatorDepositTxReceipt = await dogeToken.addOperatorDeposit(
-    operatorPublicKeyHash,
-    {
+  const addOperatorDepositTxReceipt = await dogeToken.methods
+    .addOperatorDeposit(operatorPublicKeyHash)
+    .send({
       value: value,
       from: operatorEthAddress,
       gas: 50000,
       gasPrice: argv.gasPrice,
-    }
-  );
+    });
   utils.printTxResult(addOperatorDepositTxReceipt, "Add operator deposit");
 
   await printOperatorDeposit(
@@ -93,7 +92,9 @@ async function printOperatorDeposit(
   operatorPublicKeyHash,
   label
 ) {
-  const operator = await dogeToken.operators.call(operatorPublicKeyHash);
+  const operator = await dogeToken.methods
+    .operators(operatorPublicKeyHash)
+    .call();
   console.log(`${label}: ${web3.utils.fromWei(operator[4])} eth.`);
 }
 

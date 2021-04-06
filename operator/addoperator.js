@@ -61,11 +61,9 @@ Usage: node operator/addoperator.js --dogePrivateKey <dogecoin operator private 
   );
 
   console.log("Adding operator...");
-  const addOperatorTxReceipt = await dogeToken.addOperator(
-    operatorPublicKeyCompressedString,
-    signature,
-    { from: operatorEthAddress, gas: 150000, gasPrice: argv.gasPrice }
-  );
+  const addOperatorTxReceipt = await dogeToken.methods
+    .addOperator(operatorPublicKeyCompressedString, signature)
+    .send({ from: operatorEthAddress, gas: 150000, gasPrice: argv.gasPrice });
   utils.printTxResult(addOperatorTxReceipt, "Add operator");
 }
 
