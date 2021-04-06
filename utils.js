@@ -127,16 +127,24 @@ function satoshiToDoge(dogeSatoshis) {
 }
 
 function printTxResult(txReceipt, operation) {
-  if (
-    txReceipt.logs.length == 1 &&
-    txReceipt.logs[0].event == "ErrorDogeToken"
-  ) {
-    console.log(
-      `${operation} failed!. Error: ${txReceipt.logs[0].args.err.toNumber()}`
-    );
-  } else {
-    console.log(`${operation} done.`);
+  console.log(txReceipt.events);
+  const errorEvents = txReceipt.events.ErrorDogeToken;
+  if (errorEvents === undefined) {
+    console.log(`${operation} done. Tx hash: ${txReceipt.transactionHash}`);
+    return;
   }
+
+  console.error(`Doge token error events in tx: ${txReceipt.transactionHash}`);
+  if (Array.isArray(errorEvents)) {
+    for (const event of errorEvents) {
+      // TODO: This is actually an error code. We want to provide a human readable error message here.
+      console.error(`Doge token error event index ${event.logIndex}: ${event.err}`);
+    }
+  } else {
+    // This is a single event. web3.js API quirk
+    console.error(`Doge token error event index ${errorEvents.logIndex}: ${errorEvents.err}`);
+  }
+  throw new Error(`Operation ${operation} failed!`);
 }
 
 function fromHex(data) {
