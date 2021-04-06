@@ -98,21 +98,25 @@ async function doSomeChecks(web3, sender) {
   }
 }
 
-async function printDogeTokenBalances(dt, sender, receiver) {
+async function printDogeTokenBalances(dogeToken, sender, receiver) {
   // Print sender DogeToken balance
-  const senderDogeTokenBalance = await dt.balanceOf.call(sender);
+  const senderDogeTokenBalance = await dogeToken.methods
+    .balanceOf(sender)
+    .call();
   console.log(
     `Sender doge token balance: ${satoshiToDoge(
-      senderDogeTokenBalance.toNumber()
+      senderDogeTokenBalance
     )} doge tokens.`
   );
 
   if (receiver !== undefined) {
     // Print receiver DogeToken balance
-    const receiverDogeTokenBalance = await dt.balanceOf.call(receiver);
+    const receiverDogeTokenBalance = await dogeToken.methods
+      .balanceOf(receiver)
+      .call();
     console.log(
       `Receiver doge token balance: ${satoshiToDoge(
-        receiverDogeTokenBalance.toNumber()
+        receiverDogeTokenBalance
       )} doge tokens.`
     );
   }
