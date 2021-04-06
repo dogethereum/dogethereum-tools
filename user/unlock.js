@@ -48,7 +48,7 @@ Usage: node user/unlock.js --privateKey <sender eth private key> --receiver <to 
       )
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const {
     privateKey,

@@ -21,7 +21,7 @@ Usage: node user/print-balances.js --address <eth address>`
       )
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const address = argv.address;
 

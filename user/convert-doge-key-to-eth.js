@@ -25,7 +25,7 @@ Usage: node user/convert-doge-key-to-eth.js --privateKey <private key in eth for
       )
   ).argv;
 
-  const { web3 } = utils.init(argv);
+  const { web3 } = await utils.init(argv);
 
   const dogePrivateKey = argv.dogePrivateKey;
   const privateKey = `0x${keyDogeToEthInBytes(dogePrivateKey).toString("hex")}`;

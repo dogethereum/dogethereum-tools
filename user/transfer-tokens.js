@@ -36,7 +36,7 @@ Usage: node user/transfer-tokens.js --privateKey <sender eth private key> --rece
       )
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const privateKey = argv.privateKey;
   const account = web3.eth.accounts.privateKeyToAccount(privateKey);

@@ -35,7 +35,7 @@ Usage: node operator/addoperatordeposit.js --operatorPublicKeyHash <operator pub
       )
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const operatorPublicKeyHash = argv.operatorPublicKeyHash;
   const value = argv.value;

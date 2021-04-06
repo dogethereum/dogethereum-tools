@@ -51,7 +51,7 @@ function completeYargs(yargs) {
     .version(`Dogethereum tools ${pkg.version}`);
 }
 
-function init(argv) {
+async function init(argv) {
   const web3 = new Web3(`http://${argv.host}:${argv.port}`);
 
   const deploymentPath = argv.deployment
@@ -59,7 +59,7 @@ function init(argv) {
     : path.resolve(__dirname, "deployment/deployment.json");
   const deployment = JSON.parse(fs.readFileSync(deploymentPath));
 
-  const contracts = loadDeployment(web3, deployment);
+  const contracts = await loadDeployment(web3, deployment);
   return { web3, argv, ...contracts };
 }
 

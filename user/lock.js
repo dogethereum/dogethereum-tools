@@ -83,7 +83,7 @@ Usage: node user/lock.js --value <number of doge satoshis>`
       .example("node user/lock.js --value 200000000", "Add ")
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const valueToLock = argv.value;
 

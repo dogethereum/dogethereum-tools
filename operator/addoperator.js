@@ -30,7 +30,7 @@ Usage: node operator/addoperator.js --dogePrivateKey <dogecoin operator private 
       )
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const operatorPrivateKey = argv.ethPrivateKey;
   const account = web3.eth.accounts.privateKeyToAccount(operatorPrivateKey);

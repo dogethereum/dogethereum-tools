@@ -22,7 +22,7 @@ Usage: node operator/print-status.js --operatorPublicKeyHash <operator public ke
       )
   ).argv;
 
-  const { web3, dogeToken } = utils.init(argv);
+  const { web3, dogeToken } = await utils.init(argv);
 
   const operatorPublicKeyHash = argv.operatorPublicKeyHash;
 

@@ -36,7 +36,7 @@ Usage: node user/transfer-eth.js --privateKey <sender eth private key> --receive
       )
   ).argv;
 
-  const { web3 } = utils.init(argv);
+  const { web3 } = await utils.init(argv);
 
   const privateKey = argv.privateKey;
   const account = web3.eth.accounts.privateKeyToAccount(privateKey);
