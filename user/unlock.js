@@ -93,28 +93,40 @@ Decoder error: ${err.message}`);
   }
 
   await utils.printDogeTokenBalances(dogeToken, sender);
-  const senderDogeTokenBalance = await dogeToken.balanceOf.call(sender);
-  if (valueToUnlock > senderDogeTokenBalance.toNumber()) {
+  const senderDogeTokenBalance = await dogeToken.methods
+    .balanceOf(sender)
+    .call();
+  if (valueToUnlock > senderDogeTokenBalance) {
     throw new Error("Sender doge token balance is not enough.");
   }
 
   // Do unlock
   console.log("Initiating unlock... ");
-  let minUnlockValue = await dogeToken.MIN_UNLOCK_VALUE();
-  minUnlockValue = minUnlockValue.toNumber();
+  const minUnlockValue = parseInt(
+    await dogeToken.methods.MIN_UNLOCK_VALUE().call(),
+    10
+  );
   if (valueToUnlock < minUnlockValue) {
     throw new Error(
       `Value to unlock ${valueToUnlock} should be at least ${minUnlockValue}`
     );
   }
-  const operatorsLength = await dogeToken.getOperatorsLength();
+  const operatorsLength = parseInt(
+    await dogeToken.methods.getOperatorsLength().call(),
+    10
+  );
   let valueUnlocked = 0;
   for (let i = 0; i < operatorsLength; i++) {
-    const [operatorPublicKeyHash, deleted] = await dogeToken.operatorKeys(i);
+    const {
+      key: operatorPublicKeyHash,
+      deleted,
+    } = await dogeToken.methods.operatorKeys(i).call();
     if (deleted === false) {
       // not deleted
-      const operator = await dogeToken.operators(operatorPublicKeyHash);
-      const dogeAvailableBalance = operator[1].toNumber();
+      const operator = await dogeToken.methods
+        .operators(operatorPublicKeyHash)
+        .call();
+      const dogeAvailableBalance = operator[1];
       if (dogeAvailableBalance >= minUnlockValue) {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE
         // TODO: what if valueToUnlockWithThisOperator < minUnlockValue?
@@ -131,22 +143,17 @@ Decoder error: ${err.message}`);
         // Format address as bytes20 for contracts
         decodedDogeAddress =
           "0x" + decodedDogeAddress.toString("hex").slice(2, 42);
-        const unlockTxReceipt = await dogeToken.doUnlock(
-          decodedDogeAddress,
-          valueToUnlockWithThisOperator,
-          operatorPublicKeyHash,
-          { from: sender, gas: 500000, gasPrice }
-        );
-        utils.printTxResult(unlockTxReceipt, "Unlock");
-        if (
-          !(
-            unlockTxReceipt.logs.length === 1 &&
-            unlockTxReceipt.logs[0].event === "ErrorDogeToken"
+        const unlockTxReceipt = await dogeToken.methods
+          .doUnlock(
+            decodedDogeAddress,
+            valueToUnlockWithThisOperator,
+            operatorPublicKeyHash
           )
-        ) {
-          // unlock succeeded
-          valueUnlocked += valueToUnlockWithThisOperator;
-        }
+          .send({ from: sender, gas: 500000, gasPrice });
+        // This throws if an ErrorDogeToken event is present in the receipt.
+        utils.printTxResult(unlockTxReceipt, "Unlock tx send");
+        // unlock succeeded
+        valueUnlocked += valueToUnlockWithThisOperator;
       }
     }
     if (valueUnlocked == valueToUnlock) {
