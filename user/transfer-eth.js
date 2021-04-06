@@ -81,4 +81,10 @@ Usage: node user/transfer-eth.js --privateKey <sender eth private key> --receive
   console.log("Transfer eth completed.");
 }
 
-doIt();
+doIt().then(() => {
+  process.exit(0);
+}).catch((error) => {
+  console.error(`Unhandled failure.
+${error.stack || error}`);
+  process.exit(1);
+});

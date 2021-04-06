@@ -80,4 +80,12 @@ async function printOperatorDeposit(web3, dogeToken, operatorPublicKeyHash) {
   console.log(`Operator deposit: ${web3.utils.fromWei(operator[4])} eth.`);
 }
 
-doIt();
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
+${error.stack || error}`);
+    process.exit(1);
+  });

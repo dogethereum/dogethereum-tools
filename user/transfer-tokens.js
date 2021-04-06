@@ -75,4 +75,12 @@ Usage: node user/transfer-tokens.js --privateKey <sender eth private key> --rece
   await utils.printDogeTokenBalances(dogeToken, sender, receiver);
 }
 
-doIt();
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
+${error.stack || error}`);
+    process.exit(1);
+  });

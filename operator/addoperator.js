@@ -47,10 +47,10 @@ Usage: node operator/addoperator.js --dogePrivateKey <dogecoin operator private 
   await utils.doSomeChecks(web3, operatorEthAddress);
 
   // Add operator
-  const {operatorPublicKeyCompressedString, signature} = operatorSignItsEthAddress(
-    operatorDogePrivateKey,
-    operatorEthAddress
-  );
+  const {
+    operatorPublicKeyCompressedString,
+    signature,
+  } = operatorSignItsEthAddress(operatorDogePrivateKey, operatorEthAddress);
   const operatorPublicKeyHash = bitcoreLib.crypto.Hash.ripemd160(
     bitcoreLib.crypto.Hash.sha256(
       utils.fromHex(operatorPublicKeyCompressedString)
@@ -104,7 +104,15 @@ function operatorSignItsEthAddress(
   ecdsa.signRandomK();
   ecdsa.calci();
   const signature = `0x${ecdsa.sig.toCompact().toString("hex")}`;
-  return {operatorPublicKeyCompressedString, signature};
+  return { operatorPublicKeyCompressedString, signature };
 }
 
-doIt();
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
+${error.stack || error}`);
+    process.exit(1);
+  });

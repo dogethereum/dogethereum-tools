@@ -97,4 +97,12 @@ async function printOperatorDeposit(
   console.log(`${label}: ${web3.utils.fromWei(operator[4])} eth.`);
 }
 
-doIt();
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
+${error.stack || error}`);
+    process.exit(1);
+  });

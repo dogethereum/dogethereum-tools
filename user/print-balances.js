@@ -40,4 +40,10 @@ Usage: node user/print-balances.js --address <eth address>`
   );
 }
 
-doIt();
+doIt().then(() => {
+  process.exit(0);
+}).catch((error) => {
+  console.error(`Unhandled failure.
+${error.stack || error}`);
+  process.exit(1);
+});

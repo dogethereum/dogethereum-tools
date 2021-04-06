@@ -22,6 +22,7 @@ function getEthAddress(web3, dogePrivateKey) {
   );
   return myWallet.address;
 }
+
 module.exports = {
   privKeyToEthFormat,
   getEthAddress,

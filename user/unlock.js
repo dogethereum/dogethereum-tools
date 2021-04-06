@@ -4,7 +4,6 @@ const utils = require("../utils");
 const yargs = require("yargs");
 const bitcoreLib = require("bitcore-lib");
 
-
 /**
  * This implements the user "crossing" the bridge from ethereum to dogecoin.
  * The user redeems an amount of doge tokens with one or more operators to get
@@ -54,7 +53,7 @@ Usage: node user/unlock.js --privateKey <sender eth private key> --receiver <to 
     privateKey,
     receiver: dogeDestinationAddress,
     value: valueToUnlock,
-    gasPrice
+    gasPrice,
   } = argv;
 
   const account = web3.eth.accounts.privateKeyToAccount(privateKey);
@@ -164,4 +163,12 @@ Decoder error: ${err.message}`);
   await utils.printDogeTokenBalances(dogeToken, sender);
 }
 
-doIt();
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
+${error.stack || error}`);
+    process.exit(1);
+  });

@@ -51,4 +51,10 @@ Usage: node operator/print-status.js --operatorPublicKeyHash <operator public ke
   console.log(`Active: ${operatorKey[1] == false}`);
 }
 
-doIt();
+doIt().then(() => {
+  process.exit(0);
+}).catch((error) => {
+  console.error(`Unhandled failure.
+${error.stack || error}`);
+  process.exit(1);
+});
