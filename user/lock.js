@@ -109,25 +109,28 @@ Usage: node user/lock.js --value <number of doge satoshis>`
 
   // Do lock
   console.log("Initiating lock... ");
-  let minLockValue = await dogeToken.MIN_LOCK_VALUE();
+  let minLockValue = await dogeToken.methods.MIN_LOCK_VALUE().call();
   minLockValue = minLockValue.toNumber();
   if (valueToLock < minLockValue) {
     throw new Error(
       `Value to lock ${valueToLock} doge satoshis is less than the minimum lock value ${minLockValue} doge satoshis`
     );
   }
-  let dogeEthPrice = await dogeToken.dogeEthPrice();
-  dogeEthPrice = dogeEthPrice.toNumber();
-  let collateralRatio = await dogeToken.collateralRatio();
-  collateralRatio = collateralRatio.toNumber();
+  const dogeEthPrice = parseInt(await dogeToken.methods.dogeEthPrice().call(), 10);
+  const collateralRatio = parseInt(await dogeToken.methods.collateralRatio().call(), 10);
 
-  const operatorsLength = await dogeToken.getOperatorsLength();
+  const operatorsLength = await dogeToken.methods.getOperatorsLength().call();
   let valueLocked = 0;
   for (let i = 0; i < operatorsLength; i++) {
-    const [operatorPublicKeyHash, deleted] = await dogeToken.operatorKeys(i);
+    const {
+      key: operatorPublicKeyHash,
+      deleted,
+    } = await dogeToken.methods.operatorKeys(i).call();
     if (deleted === false) {
       // not deleted
-      const operator = await dogeToken.operators(operatorPublicKeyHash);
+      const operator = await dogeToken.methods
+        .operators(operatorPublicKeyHash)
+        .call();
       const operatorDogeAvailableBalance = operator[1].toNumber();
       const operatorDogePendingBalance = operator[2].toNumber();
       const operatorEthBalance = operator[4].toNumber();

@@ -32,7 +32,7 @@ Usage: node user/print-balances.js --address <eth address>`
 
   const ethBalance = await web3.eth.getBalance(address);
   console.log(`Eth balance: ${web3.utils.fromWei(ethBalance)} eth.`);
-  const dogeTokenBalance = await dogeToken.balanceOf.call(address);
+  const dogeTokenBalance = await dogeToken.methods.balanceOf(address).call();
   console.log(
     `Doge token balance: ${utils.satoshiToDoge(
       dogeTokenBalance.toNumber()

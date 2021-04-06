@@ -59,18 +59,22 @@ Usage: node user/transfer-tokens.js --privateKey <sender eth private key> --rece
   }
 
   await utils.printDogeTokenBalances(dogeToken, sender, receiver);
-  const senderDogeTokenBalance = await dogeToken.balanceOf.call(sender);
+  const senderDogeTokenBalance = await dogeToken.methods
+    .balanceOf(sender)
+    .call();
   if (value > senderDogeTokenBalance.toNumber()) {
     throw new Error("Sender doge token balance is not enough.");
   }
 
   // Do transfer
   console.log("Initiating transfer... ");
-  const transferTxReceipt = await dogeToken.transfer(receiver, value, {
-    from: sender,
-    gas: 60000,
-    gasPrice: argv.gasPrice,
-  });
+  const transferTxReceipt = await dogeToken.methods
+    .transfer(receiver, value)
+    .send({
+      from: sender,
+      gas: 60000,
+      gasPrice: argv.gasPrice,
+    });
   utils.printTxResult(transferTxReceipt, "Transfer");
   await utils.printDogeTokenBalances(dogeToken, sender, receiver);
 }
