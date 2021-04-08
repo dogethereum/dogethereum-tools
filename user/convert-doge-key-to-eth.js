@@ -36,10 +36,12 @@ Usage: node user/convert-doge-key-to-eth.js --dogePrivateKey <private key in eth
 Ethereum private key: ${privateKey}`);
 }
 
-doIt().then(() => {
-  process.exit(0);
-}).catch((error) => {
-  console.error(`Unhandled failure.
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
 ${error.stack || error}`);
-  process.exit(1);
-});
+    process.exit(1);
+  });

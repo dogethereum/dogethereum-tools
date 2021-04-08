@@ -116,8 +116,14 @@ Usage: node user/lock.js --value <number of doge satoshis>`
       `Value to lock ${valueToLock} doge satoshis is less than the minimum lock value ${minLockValue} doge satoshis`
     );
   }
-  const dogeEthPrice = parseInt(await dogeToken.methods.dogeEthPrice().call(), 10);
-  const collateralRatio = parseInt(await dogeToken.methods.collateralRatio().call(), 10);
+  const dogeEthPrice = parseInt(
+    await dogeToken.methods.dogeEthPrice().call(),
+    10
+  );
+  const collateralRatio = parseInt(
+    await dogeToken.methods.collateralRatio().call(),
+    10
+  );
 
   const operatorsLength = await dogeToken.methods.getOperatorsLength().call();
   let valueLocked = 0;

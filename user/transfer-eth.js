@@ -71,9 +71,7 @@ Usage: node user/transfer-eth.js --privateKey <sender eth private key> --receive
   });
   console.log("Transaction sent.");
   senderEthBalance = await web3.eth.getBalance(sender);
-  console.log(
-    `Sender balance: ${web3.utils.fromWei(senderEthBalance)} eth.`
-  );
+  console.log(`Sender balance: ${web3.utils.fromWei(senderEthBalance)} eth.`);
   receiverEthBalance = await web3.eth.getBalance(receiver);
   console.log(
     `Receiver balance: ${web3.utils.fromWei(receiverEthBalance)} eth.`
@@ -81,10 +79,12 @@ Usage: node user/transfer-eth.js --privateKey <sender eth private key> --receive
   console.log("Transfer eth completed.");
 }
 
-doIt().then(() => {
-  process.exit(0);
-}).catch((error) => {
-  console.error(`Unhandled failure.
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
 ${error.stack || error}`);
-  process.exit(1);
-});
+    process.exit(1);
+  });

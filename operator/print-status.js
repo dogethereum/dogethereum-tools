@@ -33,7 +33,9 @@ Usage: node operator/print-status.js --operatorPublicKeyHash <operator public ke
   // Do some checks
   await utils.doSomeChecks(web3);
 
-  const operator = await dogeToken.methods.operators(operatorPublicKeyHash).call();
+  const operator = await dogeToken.methods
+    .operators(operatorPublicKeyHash)
+    .call();
   console.log(`Eth Address: ${operator[0].toString(16)}`);
   console.log(
     `Doge available balance: ${utils.satoshiToDoge(
@@ -47,14 +49,18 @@ Usage: node operator/print-status.js --operatorPublicKeyHash <operator public ke
   );
   console.log(`Deposit: ${web3.utils.fromWei(operator[4])} eth.`);
   const operatorKeyIndex = operator[5];
-  const operatorKey = await dogeToken.methods.operatorKeys(operatorKeyIndex).call();
+  const operatorKey = await dogeToken.methods
+    .operatorKeys(operatorKeyIndex)
+    .call();
   console.log(`Active: ${operatorKey[1] == false}`);
 }
 
-doIt().then(() => {
-  process.exit(0);
-}).catch((error) => {
-  console.error(`Unhandled failure.
+doIt()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(`Unhandled failure.
 ${error.stack || error}`);
-  process.exit(1);
-});
+    process.exit(1);
+  });
