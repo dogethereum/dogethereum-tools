@@ -47,17 +47,17 @@ eg:
 
 `node user/print-balances.js --address 0xd2394f3fad76167e7583a876c292c86ed1ffffff`
 
-#### Import doge key to eth
+#### Convert doge key to eth
 
-Imports a dogecoin private key to ethereum node and unlocks it.<br/>
+Converts a dogecoin private key to ethereum node and prints it to stdout.<br/>
 After using the lock tool, the user will get doge tokens on the eth address controlled by the same private key that signed the dogecoin lock transaction.<br/>
-In order to use the tokens, the user should import the private key to the ethereum node.
+In order to use the tokens, the user should convert the private key to the ethereum format so it can be used with the other operations.
 
-`node user/import-doge-key-to-eth.js --privateKey <private key in eth format>`
+`node user/import-doge-key-to-eth.js --dogePrivateKey <private key in dogecoin format>`
 
 eg:
 
-`node user/import-doge-key-to-eth.js --privateKey  0x17ad918b6f62b449f3978eafd5bf237e2dec84f1e0366babf88ef3850691adbc`
+`node user/import-doge-key-to-eth.js --dogePrivateKey  Kdef456def456def456def456def456def456def456def456def`
 
 
 #### Transfer Eth

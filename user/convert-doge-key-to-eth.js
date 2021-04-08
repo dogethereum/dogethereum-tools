@@ -17,7 +17,7 @@ async function doIt() {
       })
       .usage(
         `Converts a private key in dogecoin format to the standard ethereum format.
-Usage: node user/convert-doge-key-to-eth.js --privateKey <private key in eth format>`
+Usage: node user/convert-doge-key-to-eth.js --dogePrivateKey <private key in eth format>`
       )
       .example(
         "node user/convert-doge-key-to-eth.js --dogePrivateKey Kdef456def456def456def456def456def456def456def456def",
