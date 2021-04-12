@@ -109,8 +109,10 @@ Usage: node user/lock.js --value <number of doge satoshis>`
 
   // Do lock
   console.log("Initiating lock... ");
-  let minLockValue = await dogeToken.methods.MIN_LOCK_VALUE().call();
-  minLockValue = minLockValue.toNumber();
+  const minLockValue = parseInt(
+    await dogeToken.methods.MIN_LOCK_VALUE().call(),
+    10
+  );
   if (valueToLock < minLockValue) {
     throw new Error(
       `Value to lock ${valueToLock} doge satoshis is less than the minimum lock value ${minLockValue} doge satoshis`
@@ -134,12 +136,14 @@ Usage: node user/lock.js --value <number of doge satoshis>`
     } = await dogeToken.methods.operatorKeys(i).call();
     if (deleted === false) {
       // not deleted
+
+      console.log(`Operator public key hash: ${operatorPublicKeyHash}`);
       const operator = await dogeToken.methods
         .operators(operatorPublicKeyHash)
         .call();
-      const operatorDogeAvailableBalance = operator[1].toNumber();
-      const operatorDogePendingBalance = operator[2].toNumber();
-      const operatorEthBalance = operator[4].toNumber();
+      const operatorDogeAvailableBalance = parseInt(operator[1], 10);
+      const operatorDogePendingBalance = parseInt(operator[2], 10);
+      const operatorEthBalance = parseInt(operator[4], 10);
 
       const operatorReceivableDoges =
         operatorEthBalance / dogeEthPrice / collateralRatio -
@@ -150,9 +154,8 @@ Usage: node user/lock.js --value <number of doge satoshis>`
           valueToLock - valueLocked,
           operatorReceivableDoges
         );
-        const Base58Check = bitcoreLib.encoding.Base58Check;
-        const dogeAddressPrefix = argv.dogenetwork == "mainnet" ? 30 : 113;
-        const operatorDogeAddress = Base58Check.encode(
+        const dogeAddressPrefix = getAddressPrefix(argv.dogenetwork);
+        const operatorDogeAddress = bitcoreLib.encoding.Base58Check.encode(
           Buffer.concat([
             Buffer.from([dogeAddressPrefix]),
             utils.fromHex(operatorPublicKeyHash),
@@ -246,6 +249,13 @@ function invokeDogecoinRpc(dogecoinRpc, dogecoinRpcFunctionName, ...rpcParams) {
     });
     dogecoinRpcFunction.apply(dogecoinRpc, rpcParams);
   });
+}
+
+function getAddressPrefix(network) {
+  if (network === "mainnet") return 30;
+  if (network === "testnet") return 113;
+  if (network === "regtest") return 111;
+  throw new Error("Unknown network ${network}");
 }
 
 doIt()

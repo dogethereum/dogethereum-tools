@@ -138,11 +138,15 @@ function printTxResult(txReceipt, operation) {
   if (Array.isArray(errorEvents)) {
     for (const event of errorEvents) {
       // TODO: This is actually an error code. We want to provide a human readable error message here.
-      console.error(`Doge token error event index ${event.logIndex}: ${event.err}`);
+      console.error(
+        `Doge token error event index ${event.logIndex}: ${event.err}`
+      );
     }
   } else {
     // This is a single event. web3.js API quirk
-    console.error(`Doge token error event index ${errorEvents.logIndex}: ${errorEvents.err}`);
+    console.error(
+      `Doge token error event index ${errorEvents.logIndex}: ${errorEvents.err}`
+    );
   }
   throw new Error(`Operation ${operation} failed!`);
 }
