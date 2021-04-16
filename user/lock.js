@@ -80,7 +80,7 @@ async function doIt() {
         `Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.
 Usage: node user/lock.js --value <number of doge satoshis>`
       )
-      .example("node user/lock.js --value 200000000", "Add ")
+      .example("node user/lock.js --value 200000000", "Lock 2 doges to get 2 doge tokens in the ethereum network")
   ).argv;
 
   const { web3, dogeToken } = await utils.init(argv);
