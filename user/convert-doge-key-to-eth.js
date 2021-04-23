@@ -2,6 +2,7 @@
 
 const utils = require("../utils");
 const yargs = require("yargs");
+const Web3 = require("web3");
 
 const { keyDogeToEthInBytes } = require("./formatconverter");
 
@@ -25,7 +26,7 @@ Usage: node user/convert-doge-key-to-eth.js --dogePrivateKey <private key in eth
       )
   ).argv;
 
-  const { web3 } = await utils.init(argv);
+  const web3 = new Web3();
 
   const dogePrivateKey = argv.dogePrivateKey;
   const privateKey = `0x${keyDogeToEthInBytes(dogePrivateKey).toString("hex")}`;
