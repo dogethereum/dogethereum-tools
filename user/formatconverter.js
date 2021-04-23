@@ -2,10 +2,11 @@
 
 const bitcoreLib = require("bitcore-lib");
 
-function keyDogeToEthInBytes(privKeyAsExportedByDogecoinDumpprivkey) {
-  const decodedKey = bitcoreLib.encoding.Base58.decode(
-    privKeyAsExportedByDogecoinDumpprivkey
-  );
+/**
+ * @param dogePrivateKey Private key in WIF (Wallet Import Format)
+ */
+function keyDogeToEthInBytes(dogePrivateKey) {
+  const decodedKey = bitcoreLib.encoding.Base58.decode(dogePrivateKey);
   const privKeyBytes = decodedKey.slice(1, decodedKey.length - 5);
   return Buffer.from(privKeyBytes);
 }
