@@ -30,11 +30,11 @@ If you are using an old version of the tools, you can upgrade to the latest one:
 
 Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.
 
-`node user/lock.js --value <number of doge satoshis>  --dogePrivateKey <dogecoin private key in WIF> --utxoTxid <transaction id of the utxo> --utxoValue <value held by the utxo> --utxoIndex <index of the utxo in the transaction>`
+`node user/lock.js --value <number of doge satoshis> --ethereumAddress <Ethereum address that receives doge tokens> --dogePrivateKey <dogecoin private key in WIF> --utxoTxid <transaction id of the utxo> --utxoValue <value held by the utxo> --utxoIndex <index of the utxo in the transaction>`
 
 eg:
 
-`node user/lock.js --value 200000000 --dogePrivateKey cW9yAP8NRgGGN2qQ4vEQkvqhHFSNzeFPWTLBXriy5R5wf4KBWDbc --utxoTxid 34bae623d6fd05ac5d57045d0806c78e2f73f44261f0fb5ffe386cd130fad757 --utxoValue 1000000000 --utxoIndex 0`
+`node user/lock.js --value 200000000 --ethereumAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff --dogePrivateKey cW9yAP8NRgGGN2qQ4vEQkvqhHFSNzeFPWTLBXriy5R5wf4KBWDbc --utxoTxid 34bae623d6fd05ac5d57045d0806c78e2f73f44261f0fb5ffe386cd130fad757 --utxoValue 1000000000 --utxoIndex 0`
 
 
 #### Print balances

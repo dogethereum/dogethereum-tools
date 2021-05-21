@@ -105,19 +105,31 @@ async function doIt() {
         type: "number",
         demandOption: true,
       })
+      .option("ea", {
+        group: "Data:",
+        alias: "ethereumAddress",
+        describe: "Ethereum address that will receive doge tokens",
+        type: "string",
+        demandOption: true,
+      })
       .usage(
         `Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.
-Usage: node user/lock.js --value <number of doge satoshis>  --dogePrivateKey <dogecoin private key in WIF> --utxoTxid <transaction id of the utxo> --utxoValue <value held by the utxo> --utxoIndex <index of the utxo in the transaction>`
+Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Ethereum address that receives doge tokens> --dogePrivateKey <dogecoin private key in WIF> --utxoTxid <transaction id of the utxo> --utxoValue <value held by the utxo> --utxoIndex <index of the utxo in the transaction>`
       )
       .example(
-        "node user/lock.js --value 200000000 --dogePrivateKey cW9yAP8NRgGGN2qQ4vEQkvqhHFSNzeFPWTLBXriy5R5wf4KBWDbc --utxoTxid 34bae623d6fd05ac5d57045d0806c78e2f73f44261f0fb5ffe386cd130fad757 --utxoValue 1000000000 --utxoIndex 0",
-        "Lock 2 doges to get 2 doge tokens (minus fees) in the ethereum network"
+        "node user/lock.js --value 200000000 --ethereumAddress 0xd2394f3fad76167e7583a876c292c86ed1ffffff --dogePrivateKey cW9yAP8NRgGGN2qQ4vEQkvqhHFSNzeFPWTLBXriy5R5wf4KBWDbc --utxoTxid 34bae623d6fd05ac5d57045d0806c78e2f73f44261f0fb5ffe386cd130fad757 --utxoValue 1000000000 --utxoIndex 0",
+        "Lock 2 doges to get 2 doge tokens (minus fees) in the ethereum network in address 0xd2394f3fad76167e7583a876c292c86ed1ffffff"
       )
   ).argv;
 
   const { web3, dogeToken } = await utils.init(argv);
 
   const valueToLock = argv.value;
+  const ethereumAddress = argv.ethereumAddress;
+
+  if (!web3.utils.isAddress(ethereumAddress)) {
+    throw new Error("An invalid ethereum address was provided.");
+  }
 
   console.log(`Lock ${utils.satoshiToDoge(valueToLock)} doges.`);
 
@@ -213,6 +225,7 @@ Usage: node user/lock.js --value <number of doge satoshis>  --dogePrivateKey <do
           operatorDogeAddress,
           valueToLockWithThisOperator,
           utxo,
+          Buffer.from(utils.remove0x(ethereumAddress), "hex"),
           signingECPair,
           argv.dogenetwork
         );
@@ -269,6 +282,7 @@ function createSendTx(
   destinationAddress,
   lockAmount,
   { txid, index: outputIndex, value: utxoAmount },
+  ethereumAddress,
   signer,
   network,
   fee = 0 //10 ** 8
@@ -289,6 +303,8 @@ function createSendTx(
   txBuilder.setVersion(1);
   txBuilder.addInput(txid, outputIndex);
   txBuilder.addOutput(destinationAddress, lockAmount);
+  const embed = bitcoinjsLib.payments.embed({ data: [ethereumAddress] });
+  txBuilder.addOutput(embed.output, 0);
   const changeUtxoAmount = utxoAmount - lockAmount - fee;
   if (changeUtxoAmount > 0) {
     txBuilder.addOutput(signerAddress, changeUtxoAmount);
