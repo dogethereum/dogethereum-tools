@@ -127,7 +127,6 @@ function satoshiToDoge(dogeSatoshis) {
 }
 
 function printTxResult(txReceipt, operation) {
-  console.log(txReceipt.events);
   const errorEvents = txReceipt.events.ErrorDogeToken;
   if (errorEvents === undefined) {
     console.log(`${operation} done. Tx hash: ${txReceipt.transactionHash}`);
