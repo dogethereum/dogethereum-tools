@@ -117,16 +117,15 @@ Decoder error: ${err.message}`);
   );
   let valueUnlocked = 0;
   for (let i = 0; i < operatorsLength; i++) {
-    const {
-      key: operatorPublicKeyHash,
-      deleted,
-    } = await dogeToken.methods.operatorKeys(i).call();
+    const { key: operatorPublicKeyHash, deleted } = await dogeToken.methods
+      .operatorKeys(i)
+      .call();
     if (deleted === false) {
       // not deleted
       const operator = await dogeToken.methods
         .operators(operatorPublicKeyHash)
         .call();
-      const dogeAvailableBalance = operator[1];
+      const { dogeAvailableBalance } = operator;
       if (dogeAvailableBalance >= minUnlockValue) {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE
         // TODO: what if valueToUnlockWithThisOperator < minUnlockValue?
