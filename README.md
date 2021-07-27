@@ -1,6 +1,6 @@
 # Dogethereum tools
 
-Set of tools to be used by end users and operators to interact with https://github.com/dogethereum/dogethereum-contracts
+Set of tools to be used by end users and operators to interact with [dogethereum-contracts](https://github.com/dogethereum/dogethereum-contracts).
 
 If you are new to the Dogecoin <-> Ethereum bridge, please check the [docs](https://github.com/dogethereum/docs) repository first.
 
