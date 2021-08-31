@@ -1,7 +1,6 @@
 "use strict";
 
 const utils = require("../utils");
-const formatconverter = require("./formatconverter");
 const yargs = require("yargs");
 const BitcoindRpc = require("bitcoind-rpc");
 const bitcoreLib = require("bitcore-lib");
@@ -266,13 +265,9 @@ RPC error message: ${error.message}`
     }
   }
 
-  // Show the private key and eth address for the dogecoin address
-  const userPrivKeyInEthFormat = formatconverter.privKeyToEthFormat(
-    dogePrivateKey
-  );
-  console.log(`User private key: ${userPrivKeyInEthFormat}`);
-  const userEthAddress = formatconverter.getEthAddress(web3, dogePrivateKey);
-  console.log(`User eth address: ${userEthAddress}`);
+
+  // Show the eth address
+  console.log(`User eth address: ${ethereumAddress}`);
   console.log(`Total locked ${utils.satoshiToDoge(valueLocked)} doges`);
 
   console.log("Lock Done.");
