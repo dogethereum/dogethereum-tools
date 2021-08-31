@@ -251,7 +251,7 @@ RPC error message: ${error.message}`
 
           throw error;
         }
-        utxo = txAndUtxo.utxo;
+        utxo = txAndUtxo.changeUtxo;
 
         console.log(`Sent doge tx ${txAndUtxo.signedTx.getId()}`);
         valueLocked += valueToLockWithThisOperator;
