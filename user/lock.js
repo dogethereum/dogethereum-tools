@@ -265,6 +265,10 @@ RPC error message: ${error.message}`
     }
   }
 
+  // TODO: Throw this error before somehow? It's strange that we need to do this here.
+  if (valueLocked == 0) {
+    throw new Error("Couldn't lock Doges!");
+  }
 
   // Show the eth address
   console.log(`User eth address: ${ethereumAddress}`);
