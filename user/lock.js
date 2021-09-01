@@ -166,7 +166,7 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
   let utxo = {
     txid: argv.utxoTxid,
     index: argv.utxoIndex,
-    value: argv.utxoValue,
+    value: ethers.BigNumber.from(argv.utxoValue),
   };
 
   const dogePrivateKey = argv.dogePrivateKey;
@@ -279,7 +279,7 @@ function createSendTx(
 ) {
   const chainParams = getDogecoinParams(network);
   const signerAddress = dogeAddressFromKeyPair(signer, network);
-  if (utxoAmount < lockAmount + fee) {
+  if (utxoAmount.lt(lockAmount.add(fee))) {
     // TODO: show in doge units instead of satoshis?
     throw new Error(`The UTXO specified doesn't have enough doges.
   The amount to lock is: ${lockAmount}
@@ -292,17 +292,17 @@ function createSendTx(
   const txBuilder = new bitcoinjsLib.TransactionBuilder(chainParams);
   txBuilder.setVersion(1);
   txBuilder.addInput(txid, outputIndex);
-  txBuilder.addOutput(destinationAddress, lockAmount);
+  txBuilder.addOutput(destinationAddress, lockAmount.toNumber());
   const embed = bitcoinjsLib.payments.embed({ data: [ethereumAddress] });
   txBuilder.addOutput(embed.output, 0);
-  const changeUtxoAmount = utxoAmount - lockAmount - fee;
-  if (changeUtxoAmount > 0) {
-    txBuilder.addOutput(signerAddress, changeUtxoAmount);
+  const changeUtxoAmount = utxoAmount.sub(lockAmount).sub(fee);
+  if (changeUtxoAmount.gt(0)) {
+    txBuilder.addOutput(signerAddress, changeUtxoAmount.toNumber());
   }
   txBuilder.sign(0, signer);
 
   result.signedTx = txBuilder.build();
-  if (changeUtxoAmount > 0) {
+  if (changeUtxoAmount.gt(0)) {
     // Add change utxo for later use
     result.changeUtxo = {
       txid: result.signedTx.getId(),
