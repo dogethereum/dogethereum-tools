@@ -1,4 +1,3 @@
-
 /**
  * Based on dogecoin/src/rpc/protocol.h
  */
@@ -90,7 +89,7 @@ const DOGECOIN_REGTEST = {
     /**
      * BIP32 version bytes for extended non-hardened keys
      */
-    public: 0x043587CF,
+    public: 0x043587cf,
     /**
      * BIP32 version bytes for extended hardened keys
      */
@@ -116,4 +115,4 @@ module.exports = {
   DOGECOIN_TESTNET,
   DOGECOIN_REGTEST,
   ERRORS,
-}
+};
