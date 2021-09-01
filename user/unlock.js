@@ -1,8 +1,10 @@
 "use strict";
 
-const utils = require("../utils");
+const ethers = require("ethers");
 const yargs = require("yargs");
 const bitcoreLib = require("bitcore-lib");
+
+const utils = require("../utils");
 
 /**
  * This implements the user "crossing" the bridge from ethereum to dogecoin.
@@ -47,18 +49,15 @@ Usage: node user/unlock.js --privateKey <sender eth private key> --receiver <to 
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { provider, dogeToken } = await utils.init(argv);
 
-  const {
-    privateKey,
-    receiver: dogeDestinationAddress,
-    value: valueToUnlock,
-    gasPrice,
-  } = argv;
+  const { privateKey, receiver: dogeDestinationAddress, gasPrice } = argv;
 
-  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-  web3.eth.accounts.wallet.add(account);
-  const sender = account.address;
+  const signer = new ethers.Wallet(privateKey, provider);
+  const sender = signer.address;
+  const userDogeToken = dogeToken.connect(signer);
+
+  const valueToUnlock = ethers.BigNumber.from(argv.value);
 
   // Check address validity
   let decodedDogeAddress;
@@ -87,52 +86,44 @@ Decoder error: ${err.message}`);
   );
 
   // Do some checks
-  await utils.doSomeChecks(web3, sender);
-  if (!(valueToUnlock > 0)) {
-    throw new Error("Value should be greater than 0");
+  await utils.checkSignerBalance(signer);
+  if (valueToUnlock.lte(0)) {
+    throw new Error("Value to unlock should be greater than 0.");
   }
 
   await utils.printDogeTokenBalances(dogeToken, sender);
-  const senderDogeTokenBalance = await dogeToken.methods
-    .balanceOf(sender)
-    .call();
-  if (valueToUnlock > senderDogeTokenBalance) {
+  const senderDogeTokenBalance = await dogeToken.callStatic.balanceOf(sender);
+  if (valueToUnlock.gt(senderDogeTokenBalance)) {
     throw new Error("Sender doge token balance is not enough.");
   }
 
   // Do unlock
   console.log("Initiating unlock... ");
-  const minUnlockValue = parseInt(
-    await dogeToken.methods.MIN_UNLOCK_VALUE().call(),
-    10
-  );
-  if (valueToUnlock < minUnlockValue) {
+  const minUnlockValue = await dogeToken.callStatic.MIN_UNLOCK_VALUE();
+  if (valueToUnlock.lt(minUnlockValue)) {
     throw new Error(
       `Value to unlock ${valueToUnlock} should be at least ${minUnlockValue}`
     );
   }
-  const operatorsLength = parseInt(
-    await dogeToken.methods.getOperatorsLength().call(),
-    10
-  );
+  const operatorsLength = await dogeToken.callStatic.getOperatorsLength();
   let valueUnlocked = 0;
   for (let i = 0; i < operatorsLength; i++) {
-    const { key: operatorPublicKeyHash, deleted } = await dogeToken.methods
-      .operatorKeys(i)
-      .call();
+    const { key: operatorPublicKeyHash, deleted } =
+      await dogeToken.callStatic.operatorKeys(i);
     if (deleted === false) {
       // not deleted
-      const operator = await dogeToken.methods
-        .operators(operatorPublicKeyHash)
-        .call();
-      const { dogeAvailableBalance } = operator;
-      if (dogeAvailableBalance >= minUnlockValue) {
+      const { dogeAvailableBalance } = await dogeToken.callStatic.operators(
+        operatorPublicKeyHash
+      );
+      if (dogeAvailableBalance.gte(minUnlockValue)) {
         // dogeAvailableBalance >= MIN_UNLOCK_VALUE
         // TODO: what if valueToUnlockWithThisOperator < minUnlockValue?
-        const valueToUnlockWithThisOperator = Math.min(
-          valueToUnlock - valueUnlocked,
+        const currentValue = valueToUnlock.sub(valueUnlocked);
+        const valueToUnlockWithThisOperator = currentValue.lt(
           dogeAvailableBalance
-        );
+        )
+          ? currentValue
+          : dogeAvailableBalance;
         console.log(
           `Unlocking ${utils.satoshiToDoge(
             valueToUnlockWithThisOperator
@@ -142,13 +133,13 @@ Decoder error: ${err.message}`);
         // Format address as bytes20 for contracts
         decodedDogeAddress =
           "0x" + decodedDogeAddress.toString("hex").slice(2, 42);
-        const unlockTxReceipt = await dogeToken.methods
-          .doUnlock(
-            decodedDogeAddress,
-            valueToUnlockWithThisOperator,
-            operatorPublicKeyHash
-          )
-          .send({ from: sender, gas: 500000, gasPrice });
+        const unlockTx = await userDogeToken.doUnlock(
+          decodedDogeAddress,
+          valueToUnlockWithThisOperator,
+          operatorPublicKeyHash,
+          { gasLimit: 500000, gasPrice }
+        );
+        const unlockTxReceipt = await unlockTx.wait();
         // This throws if an ErrorDogeToken event is present in the receipt.
         utils.printTxResult(unlockTxReceipt, "Unlock tx send");
         // unlock succeeded

@@ -1,7 +1,9 @@
 "use strict";
 
-const utils = require("../utils");
+const ethers = require("ethers");
 const yargs = require("yargs");
+
+const utils = require("../utils");
 
 async function doIt() {
   const argv = utils.completeYargs(
@@ -22,7 +24,7 @@ Usage: node operator/print-status.js --operatorPublicKeyHash <operator public ke
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { dogeToken } = await utils.init(argv);
 
   const operatorPublicKeyHash = argv.operatorPublicKeyHash;
 
@@ -30,29 +32,26 @@ Usage: node operator/print-status.js --operatorPublicKeyHash <operator public ke
     `Print operator status for operator with public key hash ${operatorPublicKeyHash}`
   );
 
-  // Do some checks
-  await utils.doSomeChecks(web3);
-
-  const operator = await dogeToken.methods
-    .operators(operatorPublicKeyHash)
-    .call();
-  console.log(`Eth Address: ${operator[0].toString(16)}`);
+  const {
+    ethAddress,
+    dogeAvailableBalance,
+    dogePendingBalance,
+    ethBalance,
+    operatorKeyIndex,
+  } = await dogeToken.callStatic.operators(operatorPublicKeyHash);
+  console.log(`Eth Address: ${ethAddress}`);
   console.log(
     `Doge available balance: ${utils.satoshiToDoge(
-      operator[1].toNumber()
+      dogeAvailableBalance
     )} doges.`
   );
   console.log(
-    `Doge pending balance: ${utils.satoshiToDoge(
-      operator[2].toNumber()
-    )} doges.`
+    `Doge pending balance: ${utils.satoshiToDoge(dogePendingBalance)} doges.`
   );
-  console.log(`Deposit: ${web3.utils.fromWei(operator[4])} eth.`);
-  const operatorKeyIndex = operator[5];
-  const operatorKey = await dogeToken.methods
-    .operatorKeys(operatorKeyIndex)
-    .call();
-  console.log(`Active: ${operatorKey[1] == false}`);
+  console.log(`Deposit: ${ethers.utils.formatEther(ethBalance)} eth.`);
+
+  const { deleted } = await dogeToken.callStatic.operatorKeys(operatorKeyIndex);
+  console.log(`Active: ${deleted === false}`);
 }
 
 doIt()

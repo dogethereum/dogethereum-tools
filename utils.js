@@ -1,4 +1,4 @@
-const Web3 = require("web3");
+const ethers = require("ethers");
 const path = require("path");
 const fs = require("fs");
 
@@ -52,19 +52,21 @@ function completeYargs(yargs) {
 }
 
 async function init(argv) {
-  const web3 = new Web3(`http://${argv.host}:${argv.port}`);
+  const provider = ethers.getDefaultProvider(
+    `http://${argv.host}:${argv.port}`
+  );
 
   const deploymentPath = argv.deployment
     ? argv.deployment
     : path.resolve(__dirname, "deployment/deployment.json");
   const deployment = JSON.parse(fs.readFileSync(deploymentPath));
 
-  const contracts = await loadDeployment(web3, deployment);
-  return { web3, argv, ...contracts };
+  const contracts = await loadDeployment(provider, deployment);
+  return { provider, argv, ...contracts };
 }
 
-async function loadDeployment(web3, deployment) {
-  const chainId = await web3.eth.getChainId();
+async function loadDeployment(provider, deployment) {
+  const { chainId } = await provider.getNetwork();
   if (chainId !== deployment.chainId) {
     throw new Error(
       `Expected a deployment for network with chainId ${chainId} but found chainId ${deployment.chainId} instead.`
@@ -74,35 +76,31 @@ async function loadDeployment(web3, deployment) {
   const dogeTokenArtifact = deployment.contracts.dogeToken;
 
   return {
-    dogeToken: new web3.eth.Contract(
+    dogeToken: new ethers.Contract(
+      dogeTokenArtifact.address,
       dogeTokenArtifact.abi,
-      dogeTokenArtifact.address
+      provider
     ),
   };
 }
 
-async function doSomeChecks(web3, sender) {
-  // Do some checks
-  if (sender !== undefined) {
-    // Make sure sender has some eth to pay for txs
-    const senderEthBalance = await web3.eth.getBalance(sender);
-    if (senderEthBalance === "0") {
-      throw new Error("Sender address has no eth balance, aborting.");
-    } else {
-      console.log(
-        `Sender eth balance: ${web3.utils.fromWei(
-          senderEthBalance
-        )} eth. Please, make sure that is enough to pay for the tx fee.`
-      );
-    }
+async function checkSignerBalance(signer) {
+  // Make sure sender has some eth to pay for txs
+  const senderEthBalance = await signer.getBalance();
+  if (senderEthBalance.isZero()) {
+    throw new Error("Sender address has no eth balance, aborting.");
+  } else {
+    console.log(
+      `Sender eth balance: ${ethers.utils.formatEther(
+        senderEthBalance
+      )} eth. Please, make sure that is enough to pay for the tx fee.`
+    );
   }
 }
 
 async function printDogeTokenBalances(dogeToken, sender, receiver) {
   // Print sender DogeToken balance
-  const senderDogeTokenBalance = await dogeToken.methods
-    .balanceOf(sender)
-    .call();
+  const senderDogeTokenBalance = await dogeToken.callStatic.balanceOf(sender);
   console.log(
     `Sender doge token balance: ${satoshiToDoge(
       senderDogeTokenBalance
@@ -111,9 +109,9 @@ async function printDogeTokenBalances(dogeToken, sender, receiver) {
 
   if (receiver !== undefined) {
     // Print receiver DogeToken balance
-    const receiverDogeTokenBalance = await dogeToken.methods
-      .balanceOf(receiver)
-      .call();
+    const receiverDogeTokenBalance = await dogeToken.callStatic.balanceOf(
+      receiver
+    );
     console.log(
       `Receiver doge token balance: ${satoshiToDoge(
         receiverDogeTokenBalance
@@ -123,28 +121,30 @@ async function printDogeTokenBalances(dogeToken, sender, receiver) {
 }
 
 function satoshiToDoge(dogeSatoshis) {
-  return dogeSatoshis / 100000000;
+  const dogeDecimals = 8;
+  return ethers.utils.formatUnits(dogeSatoshis, dogeDecimals);
 }
 
 function printTxResult(txReceipt, operation) {
-  const errorEvents = txReceipt.events.ErrorDogeToken;
-  if (errorEvents === undefined) {
+  if (txReceipt.events === undefined) {
+    throw new Error(
+      "No events in tx {txReceipt.transactionHash} for operation ${operation}"
+    );
+  }
+
+  const errorEvents = txReceipt.events.filter((event) => {
+    event.event === "ErrorDogeToken";
+  });
+  if (errorEvents.length === 0) {
     console.log(`${operation} done. Tx hash: ${txReceipt.transactionHash}`);
     return;
   }
 
   console.error(`Doge token error events in tx: ${txReceipt.transactionHash}`);
-  if (Array.isArray(errorEvents)) {
-    for (const event of errorEvents) {
-      // TODO: This is actually an error code. We want to provide a human readable error message here.
-      console.error(
-        `Doge token error event index ${event.logIndex}: ${event.err}`
-      );
-    }
-  } else {
-    // This is a single event. web3.js API quirk
+  for (const event of errorEvents) {
+    // TODO: This is actually an error code. We want to provide a human readable error message here.
     console.error(
-      `Doge token error event index ${errorEvents.logIndex}: ${errorEvents.err}`
+      `Doge token error event index ${event.logIndex}: ${event.args}`
     );
   }
   throw new Error(`Operation ${operation} failed!`);
@@ -161,7 +161,7 @@ function remove0x(str) {
 module.exports = {
   completeYargs,
   init,
-  doSomeChecks,
+  checkSignerBalance,
   printDogeTokenBalances,
   satoshiToDoge,
   printTxResult,

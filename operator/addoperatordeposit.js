@@ -1,7 +1,9 @@
 "use strict";
 
-const utils = require("../utils");
+const ethers = require("ethers");
 const yargs = require("yargs");
+
+const utils = require("../utils");
 
 async function doIt() {
   const argv = utils.completeYargs(
@@ -35,31 +37,31 @@ Usage: node operator/addoperatordeposit.js --operatorPublicKeyHash <operator pub
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { provider, dogeToken } = await utils.init(argv);
 
   const operatorPublicKeyHash = argv.operatorPublicKeyHash;
   const value = argv.value;
-  const privateKey = argv.privateKey;
 
-  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-  web3.eth.accounts.wallet.add(account);
-  const operatorEthAddress = account.address;
+  const operatorSigner = new ethers.Wallet(argv.privateKey, provider);
+
+  const operatorDogeToken = dogeToken.connect(operatorSigner);
 
   console.log(
-    `Add operator deposit with public key hash ${operatorPublicKeyHash}, value ${web3.utils.fromWei(
+    `Add operator deposit with public key hash ${operatorPublicKeyHash}, value ${ethers.utils.formatEther(
       value
-    )} eth and eth address ${operatorEthAddress}`
+    )} eth and eth address ${operatorSigner.address}`
   );
 
   // Do some checks
-  await utils.doSomeChecks(web3, operatorEthAddress);
+  await utils.checkSignerBalance(operatorSigner);
+
   if (!(value > 0)) {
-    console.log("Value should be greater than 0");
+    // TODO: throw an error instead?
+    console.error("Value to deposit should be greater than 0.");
     return;
   }
 
   await printOperatorDeposit(
-    web3,
     dogeToken,
     operatorPublicKeyHash,
     "Current operator deposit"
@@ -68,34 +70,29 @@ Usage: node operator/addoperatordeposit.js --operatorPublicKeyHash <operator pub
   // Add operator deposit
   console.log("Adding operator deposit...");
   // TODO: check gas costs
-  const addOperatorDepositTxReceipt = await dogeToken.methods
-    .addOperatorDeposit(operatorPublicKeyHash)
-    .send({
-      value: value,
-      from: operatorEthAddress,
-      gas: 50000,
+  const addOperatorDepositTx = await operatorDogeToken.addOperatorDeposit(
+    operatorPublicKeyHash,
+    {
+      value,
+      gasLimit: 50000,
       gasPrice: argv.gasPrice,
-    });
+    }
+  );
+  const addOperatorDepositTxReceipt = await addOperatorDepositTx.wait();
   utils.printTxResult(addOperatorDepositTxReceipt, "Add operator deposit");
 
   await printOperatorDeposit(
-    web3,
     dogeToken,
     operatorPublicKeyHash,
     "Updated operator deposit"
   );
 }
 
-async function printOperatorDeposit(
-  web3,
-  dogeToken,
-  operatorPublicKeyHash,
-  label
-) {
-  const operator = await dogeToken.methods
-    .operators(operatorPublicKeyHash)
-    .call();
-  console.log(`${label}: ${web3.utils.fromWei(operator[4])} eth.`);
+async function printOperatorDeposit(dogeToken, operatorPublicKeyHash, label) {
+  const { ethBalance } = await dogeToken.callStatic.operators(
+    operatorPublicKeyHash
+  );
+  console.log(`${label}: ${ethers.utils.formatEther(ethBalance)} eth.`);
 }
 
 doIt()

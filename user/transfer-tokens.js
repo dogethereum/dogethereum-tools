@@ -1,5 +1,6 @@
 "use strict";
 
+const ethers = require("ethers");
 const utils = require("../utils");
 const yargs = require("yargs");
 
@@ -22,7 +23,7 @@ async function doIt() {
       .option("v", {
         group: "Data:",
         alias: "value",
-        describe: "number of tokens to transfer",
+        describe: "number of tokens to transfer in terms of satoshis",
         type: "number",
         demandOption: true,
       })
@@ -36,47 +37,42 @@ Usage: node user/transfer-tokens.js --privateKey <sender eth private key> --rece
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { provider, dogeToken } = await utils.init(argv);
 
-  const privateKey = argv.privateKey;
-  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-  web3.eth.accounts.wallet.add(account);
-  const sender = account.address;
+  const signer = new ethers.Wallet(argv.privateKey, provider);
+  const userDogeToken = dogeToken.connect(signer);
 
   const receiver = argv.receiver;
-  const value = argv.value;
+  const value = ethers.BigNumber.from(argv.value);
 
   console.log(
-    `Transfer ${utils.satoshiToDoge(
-      value
-    )} doge tokens from ${sender} to ${receiver}`
+    `Transfer ${utils.satoshiToDoge(value)} doge tokens from ${
+      signer.address
+    } to ${receiver}`
   );
 
   // Do some checks
-  await utils.doSomeChecks(web3, sender);
-  if (!(value > 0)) {
-    throw new Error("Value should be greater than 0");
+  await utils.checkSignerBalance(signer);
+  if (value.lte(0)) {
+    throw new Error("Value to transfer should be greater than 0");
   }
 
-  await utils.printDogeTokenBalances(dogeToken, sender, receiver);
-  const senderDogeTokenBalance = await dogeToken.methods
-    .balanceOf(sender)
-    .call();
-  if (value > senderDogeTokenBalance.toNumber()) {
+  await utils.printDogeTokenBalances(dogeToken, signer.address, receiver);
+  const senderDogeTokenBalance = await dogeToken.callStatic.balanceOf(
+    signer.address
+  );
+  if (value.gt(senderDogeTokenBalance)) {
     throw new Error("Sender doge token balance is not enough.");
   }
 
   // Do transfer
   console.log("Initiating transfer... ");
-  const transferTxReceipt = await dogeToken.methods
-    .transfer(receiver, value)
-    .send({
-      from: sender,
-      gas: 60000,
-      gasPrice: argv.gasPrice,
-    });
+  const transferTxReceipt = await userDogeToken.transfer(receiver, value, {
+    gasLimit: 60000,
+    gasPrice: argv.gasPrice,
+  });
   utils.printTxResult(transferTxReceipt, "Transfer");
-  await utils.printDogeTokenBalances(dogeToken, sender, receiver);
+  await utils.printDogeTokenBalances(dogeToken, signer.address, receiver);
 }
 
 doIt()

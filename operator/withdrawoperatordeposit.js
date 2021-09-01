@@ -1,7 +1,9 @@
 "use strict";
 
-const utils = require("../utils");
+const ethers = require("ethers");
 const yargs = require("yargs");
+
+const utils = require("../utils");
 
 async function doIt() {
   const argv = utils.completeYargs(
@@ -35,49 +37,50 @@ Usage: node operator/withdrawoperatordeposit.js --operatorPublicKeyHash <operato
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { provider, dogeToken } = await utils.init(argv);
 
   const operatorPublicKeyHash = argv.operatorPublicKeyHash;
   const value = argv.value;
-  const privateKey = argv.privateKey;
 
-  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-  web3.eth.accounts.wallet.add(account);
-  const operatorEthAddress = account.address;
+  const operatorSigner = new ethers.Wallet(argv.privateKey, provider);
+
+  const operatorDogeToken = dogeToken.connect(operatorSigner);
 
   console.log(
-    `Withdraw operator deposit with public key hash ${operatorPublicKeyHash}, value ${web3.utils.fromWei(
+    `Withdraw operator deposit with public key hash ${operatorPublicKeyHash}, value ${ethers.utils.formatEther(
       value
-    )} eth and eth address ${operatorEthAddress}`
+    )} eth and eth address ${operatorSigner.address}`
   );
 
-  // Do some checks
-  await utils.doSomeChecks(web3, operatorEthAddress);
+  await utils.checkSignerBalance(operatorSigner);
   if (!(value > 0)) {
-    throw new Error("Value should be greater than 0");
+    throw new Error("Value to withdraw should be greater than 0.");
   }
 
   // TODO: provide some checks for the value that is to be withdrawn here before sending the transaction?
-  await printOperatorDeposit(web3, dogeToken, operatorPublicKeyHash);
+  await printOperatorDeposit(dogeToken, operatorPublicKeyHash);
 
   // Withdraw operator deposit
   console.log("Withdrawing operator deposit...");
-  const withdrawOperatorDepositTxReceipt = await dogeToken.methods
-    .withdrawOperatorDeposit(operatorPublicKeyHash, value)
-    .send({ from: operatorEthAddress, gas: 50000, gasPrice: argv.gasPrice });
+  const withdrawOperatorDepositTxReceipt =
+    await operatorDogeToken.withdrawOperatorDeposit(
+      operatorPublicKeyHash,
+      value,
+      { gasLimit: 50000, gasPrice: argv.gasPrice }
+    );
   utils.printTxResult(
     withdrawOperatorDepositTxReceipt,
     "Withdraw operator deposit"
   );
 
-  await printOperatorDeposit(web3, dogeToken, operatorPublicKeyHash);
+  await printOperatorDeposit(dogeToken, operatorPublicKeyHash);
 }
 
-async function printOperatorDeposit(web3, dogeToken, operatorPublicKeyHash) {
-  const operator = await dogeToken.methods
-    .operators(operatorPublicKeyHash)
-    .call();
-  console.log(`Operator deposit: ${web3.utils.fromWei(operator[4])} eth.`);
+async function printOperatorDeposit(dogeToken, operatorPublicKeyHash) {
+  const { ethBalance } = await dogeToken.callStatic.operators(
+    operatorPublicKeyHash
+  );
+  console.log(`Operator deposit: ${ethers.utils.formatEther(ethBalance)} eth.`);
 }
 
 doIt()

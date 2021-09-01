@@ -1,8 +1,11 @@
 "use strict";
 
-const utils = require("../utils");
-const yargs = require("yargs");
+const ethers = require("ethers");
 const bitcoreLib = require("bitcore-lib");
+const yargs = require("yargs");
+
+const utils = require("../utils");
+
 const ECDSA = bitcoreLib.crypto.ECDSA;
 
 async function doIt() {
@@ -30,12 +33,12 @@ Usage: node operator/addoperator.js --dogePrivateKey <dogecoin operator private 
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { provider, dogeToken } = await utils.init(argv);
 
-  const operatorPrivateKey = argv.ethPrivateKey;
-  const account = web3.eth.accounts.privateKeyToAccount(operatorPrivateKey);
-  web3.eth.accounts.wallet.add(account);
-  const operatorEthAddress = account.address;
+  const operatorSigner = new ethers.Wallet(argv.ethPrivateKey, provider);
+  const operatorEthAddress = operatorSigner.address;
+
+  const operatorDogeToken = dogeToken.connect(operatorSigner);
 
   const operatorDogePrivateKey = argv.dogePrivateKey;
 
@@ -44,13 +47,11 @@ Usage: node operator/addoperator.js --dogePrivateKey <dogecoin operator private 
   );
 
   // Do some checks
-  await utils.doSomeChecks(web3, operatorEthAddress);
+  await utils.checkSignerBalance(operatorEthAddress);
 
   // Add operator
-  const {
-    operatorPublicKeyCompressedString,
-    signature,
-  } = operatorSignItsEthAddress(operatorDogePrivateKey, operatorEthAddress);
+  const { operatorPublicKeyCompressedString, signature } =
+    operatorSignItsEthAddress(operatorDogePrivateKey, operatorEthAddress);
   const operatorPublicKeyHash = bitcoreLib.crypto.Hash.ripemd160(
     bitcoreLib.crypto.Hash.sha256(
       utils.fromHex(operatorPublicKeyCompressedString)
@@ -61,9 +62,12 @@ Usage: node operator/addoperator.js --dogePrivateKey <dogecoin operator private 
   );
 
   console.log("Adding operator...");
-  const addOperatorTxReceipt = await dogeToken.methods
-    .addOperator(operatorPublicKeyCompressedString, signature)
-    .send({ from: operatorEthAddress, gas: 150000, gasPrice: argv.gasPrice });
+  const addOperatorTx = await operatorDogeToken.addOperator(
+    operatorPublicKeyCompressedString,
+    signature,
+    { gasLimit: 150000, gasPrice: argv.gasPrice }
+  );
+  const addOperatorTxReceipt = await addOperatorTx.wait();
   utils.printTxResult(addOperatorTxReceipt, "Add operator");
 }
 

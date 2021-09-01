@@ -1,16 +1,21 @@
 "use strict";
 
-const utils = require("../utils");
-const yargs = require("yargs");
+const ethers = require("ethers");
 const BitcoindRpc = require("bitcoind-rpc");
 const bitcoreLib = require("bitcore-lib");
 const bitcoinjsLib = require("bitcoinjs-lib");
+const yargs = require("yargs");
+
+const utils = require("../utils");
+
 const {
   DOGECOIN_MAINNET,
   DOGECOIN_TESTNET,
   DOGECOIN_REGTEST,
   ERRORS,
 } = require("./dogeProtocol");
+
+const dogeDecimals = 8;
 
 /**
  * This implements the user "crossing" the bridge from dogecoin to ethereum.
@@ -121,12 +126,12 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { dogeToken } = await utils.init(argv);
 
-  const valueToLock = argv.value;
+  const valueToLock = ethers.BigNumber.from(argv.value);
   const ethereumAddress = argv.ethereumAddress;
 
-  if (!web3.utils.isAddress(ethereumAddress)) {
+  if (!ethers.utils.isAddress(ethereumAddress)) {
     throw new Error("An invalid ethereum address was provided.");
   }
 
@@ -144,32 +149,20 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
   await invokeDogecoinRpc(dogecoinRpc, "getinfo");
   console.log("Connected to dogecoin node!");
 
-  // Do some checks
-  await utils.doSomeChecks(web3);
-  if (!(valueToLock > 0)) {
-    throw new Error("Value should be greater than 0");
+  if (valueToLock.lte(0)) {
+    throw new Error("Value to lock should be greater than 0.");
   }
 
   // Do lock
   console.log("Initiating lock... ");
-  const minLockValue = parseInt(
-    await dogeToken.methods.MIN_LOCK_VALUE().call(),
-    10
-  );
-  if (valueToLock < minLockValue) {
+  const minLockValue = await dogeToken.callStatic.MIN_LOCK_VALUE();
+  if (valueToLock.lt(minLockValue)) {
     throw new Error(
       `Value to lock ${valueToLock} doge satoshis is less than the minimum lock value ${minLockValue} doge satoshis`
     );
   }
-  const dogeEthPrice = parseInt(
-    await dogeToken.methods.dogeEthPrice().call(),
-    10
-  );
-  const collateralRatio = parseInt(
-    await dogeToken.methods.collateralRatio().call(),
-    10
-  );
-
+  const dogeEthPrice = await dogeToken.callStatic.dogeEthPrice();
+  const collateralRatio = await dogeToken.callStatic.collateralRatio();
   let utxo = {
     txid: argv.utxoTxid,
     index: argv.utxoIndex,
@@ -180,33 +173,31 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
   const signingECPair = dogeKeyPairFromWIF(dogePrivateKey, argv.dogenetwork);
   const dogeAddressPrefix = getAddressPrefix(argv.dogenetwork);
 
-  const operatorsLength = await dogeToken.methods.getOperatorsLength().call();
+  const operatorsLength = await dogeToken.callStatic.getOperatorsLength();
   let valueLocked = 0;
   for (let i = 0; i < operatorsLength; i++) {
-    const {
-      key: operatorPublicKeyHash,
-      deleted,
-    } = await dogeToken.methods.operatorKeys(i).call();
+    const { key: operatorPublicKeyHash, deleted } =
+      await dogeToken.callStatic.operatorKeys(i);
     if (deleted === false) {
       // not deleted
 
       console.log(`Operator public key hash: ${operatorPublicKeyHash}`);
-      const operator = await dogeToken.methods
-        .operators(operatorPublicKeyHash)
-        .call();
-      const operatorDogeAvailableBalance = parseInt(operator[1], 10);
-      const operatorDogePendingBalance = parseInt(operator[2], 10);
-      const operatorEthBalance = parseInt(operator[4], 10);
+      const { ethBalance, dogeAvailableBalance, dogePendingBalance } =
+        await dogeToken.callStatic.operators(operatorPublicKeyHash);
 
-      const operatorReceivableDoges =
-        operatorEthBalance / dogeEthPrice / collateralRatio -
-        (operatorDogeAvailableBalance + operatorDogePendingBalance);
+      const operatorReceivableDoges = ethBalance
+        .mul(ethers.BigNumber.from(10).pow(dogeDecimals))
+        .div(dogeEthPrice)
+        .div(collateralRatio)
+        .sub(dogeAvailableBalance.add(dogePendingBalance));
 
       if (operatorReceivableDoges >= minLockValue) {
-        const valueToLockWithThisOperator = Math.min(
-          valueToLock - valueLocked,
+        const currentValue = valueToLock.sub(valueLocked);
+        const valueToLockWithThisOperator = currentValue.lt(
           operatorReceivableDoges
-        );
+        )
+          ? currentValue
+          : operatorReceivableDoges;
         const operatorDogeAddress = bitcoreLib.encoding.Base58Check.encode(
           Buffer.concat([
             Buffer.from([dogeAddressPrefix]),

@@ -1,7 +1,9 @@
 "use strict";
 
-const utils = require("../utils");
+const ethers = require("ethers");
 const yargs = require("yargs");
+
+const utils = require("../utils");
 
 async function doIt() {
   const argv = utils.completeYargs(
@@ -36,45 +38,45 @@ Usage: node user/transfer-eth.js --privateKey <sender eth private key> --receive
       )
   ).argv;
 
-  const { web3 } = await utils.init(argv);
+  const { provider } = await utils.init(argv);
 
-  const privateKey = argv.privateKey;
-  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-  web3.eth.accounts.wallet.add(account);
-  const sender = account.address;
+  const signer = new ethers.Wallet(argv.privateKey, provider);
 
   const receiver = argv.receiver;
   const value = argv.value;
 
   console.log(
-    `Transfer ${web3.utils.fromWei(value)} eth from ${sender} to ${receiver}`
+    `Transfer ${ethers.utils.formatEther(value)} eth from ${
+      signer.address
+    } to ${receiver}`
   );
 
   // Do some checks
-  await utils.doSomeChecks(web3, sender);
+  await utils.checkSignerBalance(signer);
   if (!(value > 0)) {
-    throw new Error("Value should be greater than 0");
+    throw new Error("Value to transfer should be greater than 0.");
   }
 
   // Do transfer
-  let senderEthBalance = await web3.eth.getBalance(sender);
-  // console.log(`Sender eth balance: ${web3.utils.fromWei(senderEthBalance)}`);
-  let receiverEthBalance = await web3.eth.getBalance(receiver);
+  let senderEthBalance = await signer.getBalance();
+  // console.log(`Sender eth balance: ${ethers.utils.formatEther(senderEthBalance)}`);
+  let receiverEthBalance = await provider.getBalance(receiver);
   console.log(
-    `Receiver balance: ${web3.utils.fromWei(receiverEthBalance)} eth.`
+    `Receiver balance: ${ethers.utils.formatEther(receiverEthBalance)} eth.`
   );
   console.log("Sending transaction...");
-  await web3.eth.sendTransaction({
-    from: sender,
+  await signer.sendTransaction({
     to: receiver,
-    value: value,
+    value,
   });
   console.log("Transaction sent.");
-  senderEthBalance = await web3.eth.getBalance(sender);
-  console.log(`Sender balance: ${web3.utils.fromWei(senderEthBalance)} eth.`);
-  receiverEthBalance = await web3.eth.getBalance(receiver);
+  senderEthBalance = await signer.getBalance();
   console.log(
-    `Receiver balance: ${web3.utils.fromWei(receiverEthBalance)} eth.`
+    `Sender balance: ${ethers.utils.formatEther(senderEthBalance)} eth.`
+  );
+  receiverEthBalance = await provider.getBalance(receiver);
+  console.log(
+    `Receiver balance: ${ethers.utils.formatEther(receiverEthBalance)} eth.`
   );
   console.log("Transfer eth completed.");
 }

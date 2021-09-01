@@ -1,7 +1,9 @@
 "use strict";
 
-const utils = require("../utils");
+const ethers = require("ethers");
 const yargs = require("yargs");
+
+const utils = require("../utils");
 
 async function doIt() {
   const argv = utils.completeYargs(
@@ -21,22 +23,17 @@ Usage: node user/print-balances.js --address <eth address>`
       )
   ).argv;
 
-  const { web3, dogeToken } = await utils.init(argv);
+  const { provider, dogeToken } = await utils.init(argv);
 
   const address = argv.address;
 
   console.log(`Print eth and doge token balances for eth address ${address}`);
 
-  // Do some checks
-  await utils.doSomeChecks(web3);
-
-  const ethBalance = await web3.eth.getBalance(address);
-  console.log(`Eth balance: ${web3.utils.fromWei(ethBalance)} eth.`);
-  const dogeTokenBalance = await dogeToken.methods.balanceOf(address).call();
+  const ethBalance = await provider.getBalance(address);
+  console.log(`Eth balance: ${ethers.utils.formatEther(ethBalance)} eth.`);
+  const dogeTokenBalance = await dogeToken.callStatic.balanceOf(address);
   console.log(
-    `Doge token balance: ${utils.satoshiToDoge(
-      dogeTokenBalance.toNumber()
-    )} doge tokens.`
+    `Doge token balance: ${utils.satoshiToDoge(dogeTokenBalance)} doge tokens.`
   );
 }
 
