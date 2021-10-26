@@ -162,7 +162,9 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
     );
   }
   const dogeEthPrice = await dogeToken.callStatic.dogeEthPrice();
-  const collateralRatio = await dogeToken.callStatic.collateralRatio();
+  const lockCollateralRatio = await dogeToken.callStatic.lockCollateralRatio();
+  const collateralRatioFraction =
+    await dogeToken.callStatic.DOGETHEREUM_COLLATERAL_RATIO_FRACTION();
   let utxo = {
     txid: argv.utxoTxid,
     index: argv.utxoIndex,
@@ -187,8 +189,9 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
 
       const operatorReceivableDoges = ethBalance
         .mul(ethers.BigNumber.from(10).pow(dogeDecimals))
+        .mul(collateralRatioFraction)
         .div(dogeEthPrice)
-        .div(collateralRatio)
+        .div(lockCollateralRatio)
         .sub(dogeAvailableBalance.add(dogePendingBalance));
 
       if (operatorReceivableDoges >= minLockValue) {
