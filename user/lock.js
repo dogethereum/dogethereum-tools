@@ -116,6 +116,14 @@ async function doIt() {
         type: "string",
         demandOption: true,
       })
+      .option("tx", {
+        group: "Output:",
+        default: false,
+        alias: "printTxJson",
+        describe:
+          "Print to standard output a JSON that describes the lock operation.",
+        type: "boolean",
+      })
       .usage(
         `Converts doges on the dogecoin blockchain to doge tokens on the eth blockchain.
 Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Ethereum address that receives doge tokens> --dogePrivateKey <dogecoin private key in WIF> --utxoTxid <transaction id of the utxo> --utxoValue <value held by the utxo> --utxoIndex <index of the utxo in the transaction>`
@@ -135,7 +143,7 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
     throw new Error("An invalid ethereum address was provided.");
   }
 
-  console.log(`Lock ${utils.satoshiToDoge(valueToLock)} doges.`);
+  console.error(`Lock ${utils.satoshiToDoge(valueToLock)} doges.`);
 
   const dogeRpcConfig = {
     protocol: "http",
@@ -147,14 +155,14 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
 
   const dogecoinRpc = new BitcoindRpc(dogeRpcConfig);
   await invokeDogecoinRpc(dogecoinRpc, "getinfo");
-  console.log("Connected to dogecoin node!");
+  console.error("Connected to dogecoin node!");
 
   if (valueToLock.lte(0)) {
     throw new Error("Value to lock should be greater than 0.");
   }
 
   // Do lock
-  console.log("Initiating lock... ");
+  console.error("Initiating lock... ");
   const minLockValue = await dogeToken.callStatic.MIN_LOCK_VALUE();
   if (valueToLock.lt(minLockValue)) {
     throw new Error(
@@ -177,79 +185,80 @@ Usage: node user/lock.js --value <number of doge satoshis> --ethereumAddress <Et
 
   const operatorsLength = await dogeToken.callStatic.getOperatorsLength();
   let valueLocked = 0;
+  const txs = [];
   for (let i = 0; i < operatorsLength; i++) {
     const { key: operatorPublicKeyHash, deleted } =
       await dogeToken.callStatic.operatorKeys(i);
-    if (deleted === false) {
-      // not deleted
+    if (deleted) continue;
 
-      console.log(`Operator public key hash: ${operatorPublicKeyHash}`);
-      const { ethBalance, dogeAvailableBalance, dogePendingBalance } =
-        await dogeToken.callStatic.operators(operatorPublicKeyHash);
+    // not deleted
+    console.error(`Operator public key hash: ${operatorPublicKeyHash}`);
+    const { ethBalance, dogeAvailableBalance, dogePendingBalance } =
+      await dogeToken.callStatic.operators(operatorPublicKeyHash);
 
-      const operatorReceivableDoges = ethBalance
-        .mul(ethers.BigNumber.from(10).pow(dogeDecimals))
-        .mul(collateralRatioFraction)
-        .div(dogeEthPrice)
-        .div(lockCollateralRatio)
-        .sub(dogeAvailableBalance.add(dogePendingBalance));
+    const operatorReceivableDoges = ethBalance
+      .mul(ethers.BigNumber.from(10).pow(dogeDecimals))
+      .mul(collateralRatioFraction)
+      .div(dogeEthPrice)
+      .div(lockCollateralRatio)
+      .sub(dogeAvailableBalance.add(dogePendingBalance));
 
-      if (operatorReceivableDoges >= minLockValue) {
-        const currentValue = valueToLock.sub(valueLocked);
-        const valueToLockWithThisOperator = currentValue.lt(
-          operatorReceivableDoges
-        )
-          ? currentValue
-          : operatorReceivableDoges;
-        const operatorDogeAddress = bitcoreLib.encoding.Base58Check.encode(
-          Buffer.concat([
-            Buffer.from([dogeAddressPrefix]),
-            utils.fromHex(operatorPublicKeyHash),
-          ])
+    if (operatorReceivableDoges >= minLockValue) {
+      const currentValue = valueToLock.sub(valueLocked);
+      const valueToLockWithThisOperator = currentValue.lt(
+        operatorReceivableDoges
+      )
+        ? currentValue
+        : operatorReceivableDoges;
+      const operatorDogeAddress = bitcoreLib.encoding.Base58Check.encode(
+        Buffer.concat([
+          Buffer.from([dogeAddressPrefix]),
+          utils.fromHex(operatorPublicKeyHash),
+        ])
+      );
+      console.error(
+        `Locking ${utils.satoshiToDoge(
+          valueToLockWithThisOperator
+        )} doges to address ${operatorDogeAddress} using operator ${operatorPublicKeyHash}`
+      );
+
+      // TODO: parametrize fee
+      const txAndUtxo = createSendTx(
+        operatorDogeAddress,
+        valueToLockWithThisOperator,
+        utxo,
+        Buffer.from(utils.remove0x(ethereumAddress), "hex"),
+        signingECPair,
+        argv.dogenetwork
+      );
+      txs.push(txAndUtxo);
+
+      try {
+        await invokeDogecoinRpc(
+          dogecoinRpc,
+          "sendrawtransaction",
+          txAndUtxo.signedTx.toHex()
         );
-        console.log(
-          `Locking ${utils.satoshiToDoge(
-            valueToLockWithThisOperator
-          )} doges to address ${operatorDogeAddress} using operator ${operatorPublicKeyHash}`
-        );
-
-        // TODO: parametrize fee
-        const txAndUtxo = createSendTx(
-          operatorDogeAddress,
-          valueToLockWithThisOperator,
-          utxo,
-          Buffer.from(utils.remove0x(ethereumAddress), "hex"),
-          signingECPair,
-          argv.dogenetwork
-        );
-
-        try {
-          await invokeDogecoinRpc(
-            dogecoinRpc,
-            "sendrawtransaction",
-            txAndUtxo.signedTx.toHex()
-          );
-        } catch (error) {
-          if (
-            error.code === ERRORS.RPC_VERIFY_REJECTED &&
-            typeof error.message === "string" &&
-            error.message.includes(
-              "mandatory-script-verify-flag-failed (Non-canonical DER signature)"
-            )
-          ) {
-            throw new Error(
-              `The signature verification for the transaction failed. Is the transaction of the utxo a P2PKH transaction?
+      } catch (error) {
+        if (
+          error.code === ERRORS.RPC_VERIFY_REJECTED &&
+          typeof error.message === "string" &&
+          error.message.includes(
+            "mandatory-script-verify-flag-failed (Non-canonical DER signature)"
+          )
+        ) {
+          throw new Error(
+            `The signature verification for the transaction failed. Is the transaction of the utxo a P2PKH transaction?
 RPC error message: ${error.message}`
-            );
-          }
-
-          throw error;
+          );
         }
-        utxo = txAndUtxo.changeUtxo;
 
-        console.log(`Sent doge tx ${txAndUtxo.signedTx.getId()}`);
-        valueLocked += valueToLockWithThisOperator;
+        throw error;
       }
+      utxo = txAndUtxo.changeUtxo;
+
+      console.error(`Sent doge tx ${txAndUtxo.signedTx.getId()}`);
+      valueLocked += valueToLockWithThisOperator;
     }
     if (
       valueToLock - minLockValue <= valueLocked &&
@@ -264,11 +273,17 @@ RPC error message: ${error.message}`
     throw new Error("Couldn't lock Doges!");
   }
 
-  // Show the eth address
-  console.log(`User eth address: ${ethereumAddress}`);
-  console.log(`Total locked ${utils.satoshiToDoge(valueLocked)} doges`);
+  if (argv.printTxJson) {
+    // Note that this is not a stable representation.
+    // TODO: Remove bignumber objects and buffers in favor of strings and arrays.
+    console.log(JSON.stringify(txs));
+  }
 
-  console.log("Lock Done.");
+  // Show the eth address
+  console.error(`User eth address: ${ethereumAddress}`);
+  console.error(`Total locked ${utils.satoshiToDoge(valueLocked)} doges`);
+
+  console.error("Lock Done.");
 }
 
 function createSendTx(
@@ -305,10 +320,11 @@ function createSendTx(
   txBuilder.sign(0, signer);
 
   result.signedTx = txBuilder.build();
+  result.txid = result.signedTx.getId();
   if (changeUtxoAmount.gt(0)) {
     // Add change utxo for later use
     result.changeUtxo = {
-      txid: result.signedTx.getId(),
+      txid: result.txid,
       index: 1,
       value: changeUtxoAmount,
     };
