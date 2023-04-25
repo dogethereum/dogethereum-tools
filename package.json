@@ -8,7 +8,7 @@
   "dependencies": {
     "bitcoind-rpc": "^0.8.1",
     "bitcoinjs-lib": "^5.2.0",
-    "bitcore-lib": "^0.13.9",
+    "bitcore-lib": "^10.0.5",
     "ethers": "^5.4.6",
     "yargs": "^16.2.0"
   },
